@@ -1,0 +1,11 @@
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\bin\Debug\net8.0\RoomRentalManagerServer.Domain.deps.json
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\bin\Debug\net8.0\RoomRentalManagerServer.Domain.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\bin\Debug\net8.0\RoomRentalManagerServer.Domain.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\RoomRentalManagerServer.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\RoomRentalManagerServer.Domain.AssemblyInfoInputs.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\RoomRentalManagerServer.Domain.AssemblyInfo.cs
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\RoomRentalManagerServer.Domain.csproj.CoreCompileInputs.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\RoomRentalManagerServer.Domain.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\refint\RoomRentalManagerServer.Domain.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\RoomRentalManagerServer.Domain.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Domain\obj\Debug\net8.0\ref\RoomRentalManagerServer.Domain.dll

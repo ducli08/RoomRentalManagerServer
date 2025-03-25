@@ -1,0 +1,17 @@
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Application.deps.json
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Application.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Application.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Domain.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Infrastructure.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Domain.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\bin\Debug\net8.0\RoomRentalManagerServer.Infrastructure.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.csproj.AssemblyReference.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.AssemblyInfoInputs.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.AssemblyInfo.cs
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.csproj.CoreCompileInputs.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRent.9828D8F0.Up2Date
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\refint\RoomRentalManagerServer.Application.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\RoomRentalManagerServer.Application.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Application\obj\Debug\net8.0\ref\RoomRentalManagerServer.Application.dll

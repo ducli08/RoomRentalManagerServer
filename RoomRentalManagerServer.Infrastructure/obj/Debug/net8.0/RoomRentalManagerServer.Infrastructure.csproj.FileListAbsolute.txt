@@ -1,0 +1,17 @@
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\bin\Debug\net8.0\RoomRentalManagerServer.Infrastructure.deps.json
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\bin\Debug\net8.0\RoomRentalManagerServer.Infrastructure.runtimeconfig.json
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\bin\Debug\net8.0\RoomRentalManagerServer.Infrastructure.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\bin\Debug\net8.0\RoomRentalManagerServer.Infrastructure.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\bin\Debug\net8.0\RoomRentalManagerServer.Domain.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\bin\Debug\net8.0\RoomRentalManagerServer.Domain.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.csproj.AssemblyReference.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.AssemblyInfoInputs.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.AssemblyInfo.cs
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.csproj.CoreCompileInputs.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRent.4C8553CA.Up2Date
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\refint\RoomRentalManagerServer.Infrastructure.dll
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.pdb
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\RoomRentalManagerServer.Infrastructure.genruntimeconfig.cache
+D:\Working\RoomRentalServer\RoomRentalManagerServer.Infrastructure\obj\Debug\net8.0\ref\RoomRentalManagerServer.Infrastructure.dll
