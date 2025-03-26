@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\RoomRentalManagerServer.API.props" />
-</Project>
