@@ -1,25 +1,47 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RoomRentalManagerServer.Domain.ModelEntities.User;
+using RoomRentalManagerServer.Infrastructure.Data;
 
 namespace RoomRentalManagerServer.Application.Services
 {
     public class UserAppService : IUserAppService
     {
         private readonly ILogger<UserAppService> _logger;
-        public UserAppService(ILogger<UserAppService> logger)
+        private readonly RoomRentalManagerServerDbContext _context;
+        private readonly IMapper _mapper;
+        public UserAppService(ILogger<UserAppService> logger, RoomRentalManagerServerDbContext context, IMapper mapper)
         {
             _logger = logger;
+            _context = context;
+            _mapper = mapper;
         }
-        public async Task<UserDto> CreateOrEditUserAsync(CreateOrEditUserDto input)
+        public async Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input)
         {
-            _logger.LogInformation($"Start Create or Update User");
-            throw new NotImplementedException();
+            var action = input.Id != null ? "Edit" : "Create";
+            var res = true;
+            try
+            {
+                var user = _mapper.Map<Users>(input);
+                if (input.Id != null)
+                {
+                    await _context.Users.AddAsync(user);
+                }
+                else
+                {
+                    _context.Users.Update(user);
+                }
+                _context.SaveChanges();
+                return res;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Failed to {action}: {ex.Message}");
+                throw;
+            }
+            
         }
 
         public async Task<bool> DeleteUserAsync(long id)

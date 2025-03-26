@@ -11,7 +11,7 @@ namespace RoomRentalManagerServer.Application.Interfaces
     {
         Task<List<UserDto>> GetAllUsersAsync();
         Task<UserDto> GetUserByIdAsync(long id);
-        Task<UserDto> CreateOrEditUserAsync(CreateOrEditUserDto input);
+        Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input);
         Task<bool> DeleteUserAsync(long id);
     }
 }

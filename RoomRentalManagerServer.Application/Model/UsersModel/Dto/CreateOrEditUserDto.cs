@@ -9,7 +9,7 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
 {
     public class CreateOrEditUserDto
     {
-        public long Id { get; set; }
+        public long? Id { get; set; }
         public int RoleGroupId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
