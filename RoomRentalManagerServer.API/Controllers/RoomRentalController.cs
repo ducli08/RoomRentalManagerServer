@@ -4,7 +4,7 @@ using RoomRentalManagerServer.Application.Interfaces;
 namespace RoomRentalManagerServer.API.Controllers
 {
     [ApiController]
-    [Route("api/roomrental")]
+    [Route("api/[controller]")]
     public class RoomRentalController : Controller
     {
         public readonly IUserAppService _userAppService;

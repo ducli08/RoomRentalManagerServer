@@ -4,18 +4,16 @@ using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 
 namespace RoomRentalManagerServer.API.Controllers
 {
-    public class UserController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UserController : ControllerBase
     {
         public readonly IUserAppService _userAppService;
         public UserController(IUserAppService userAppService)
         {
             _userAppService = userAppService;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
-
+        [HttpPost("createOrEditUser")]
         public async Task<ActionResult> CreateOrEditUser(CreateOrEditUserDto input)
         {
             var resCreateOrUpdate = await _userAppService.CreateOrEditUserAsync(input);
@@ -25,7 +23,13 @@ namespace RoomRentalManagerServer.API.Controllers
                 code = resCreateOrUpdate ? 200 : 500,
                 message = resCreateOrUpdate ? $"User {action} successfully" : $"Failed to {action} user"
             };
-            return Json(res);
+            return Ok(res);
+        }
+        [HttpGet("editingPopupRead")]
+        public async Task<List<UserDto>> EditingPopupRead()
+        {
+            var lstUser = await _userAppService.GetAllUsersAsync();
+            return lstUser;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
 {
     public class UserDto
     {
+        public long Id { get; set; }
         [Display(Name = "Tên người dùng", Order = 1)]
         public string Name { get; set; }
 
