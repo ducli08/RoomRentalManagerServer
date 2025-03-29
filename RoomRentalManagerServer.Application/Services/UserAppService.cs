@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
+using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
 using RoomRentalManagerServer.Infrastructure.Data;
 
@@ -10,13 +11,13 @@ namespace RoomRentalManagerServer.Application.Services
     public class UserAppService : IUserAppService
     {
         private readonly ILogger<UserAppService> _logger;
-        private readonly RoomRentalManagerServerDbContext _context;
         private readonly IMapper _mapper;
-        public UserAppService(ILogger<UserAppService> logger, RoomRentalManagerServerDbContext context, IMapper mapper)
+        private readonly IUserRepository _userRepository;
+        public UserAppService(ILogger<UserAppService> logger,IUserRepository userRepository,IMapper mapper)
         {
             _logger = logger;
-            _context = context;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
         public async Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input)
         {
@@ -27,13 +28,12 @@ namespace RoomRentalManagerServer.Application.Services
                 var user = _mapper.Map<Users>(input);
                 if (input.Id != null)
                 {
-                    await _context.Users.AddAsync(user);
+                    await _userRepository.UpdateAsync(user);
                 }
                 else
                 {
-                    _context.Users.Update(user);
+                    await _userRepository.AddAsync(user);
                 }
-                _context.SaveChanges();
                 return res;
             }
             catch (Exception ex)
