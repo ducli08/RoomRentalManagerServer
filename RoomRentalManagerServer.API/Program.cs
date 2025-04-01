@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using RoomRentalManagerServer.Infrastructure.Data;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
+using RoomRentalManagerServer.Infrastructure.Data;
 using RoomRentalManagerServer.Infrastructure.Repositories.UserRepository;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
+using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<RoomRentalManagerServerDbContext>(options =>

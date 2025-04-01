@@ -51,6 +51,7 @@ namespace RoomRentalManagerServer.Application.Services
 
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
+            var lstUser = _userRepository.GetAllAsync();
             throw new NotImplementedException();
         }
 
