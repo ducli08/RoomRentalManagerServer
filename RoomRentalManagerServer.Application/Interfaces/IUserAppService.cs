@@ -1,4 +1,5 @@
-﻿using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
+﻿using RoomRentalManagerServer.Application.Common;
+using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace RoomRentalManagerServer.Application.Interfaces
 {
     public interface IUserAppService
     {
-        Task<List<UserDto>> GetAllUsersAsync();
+        Task<PagedResultDto<UserDto>> GetAllUsersAsync(PagedRequestDto pagedRequestDto);
         Task<UserDto> GetUserByIdAsync(long id);
         Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input);
         Task<bool> DeleteUserAsync(long id);

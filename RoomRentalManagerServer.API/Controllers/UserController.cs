@@ -26,10 +26,10 @@ namespace RoomRentalManagerServer.API.Controllers
             return Ok(res);
         }
         [HttpGet("editingPopupRead")]
-        public async Task<List<UserDto>> EditingPopupRead()
+        public async Task<IActionResult> EditingPopupRead([FromQuery] PagedRequestDto requestDto)
         {
-            var lstUser = await _userAppService.GetAllUsersAsync();
-            return lstUser;
+            var result = await _userAppService.GetAllUsersAsync(requestDto);
+            return Ok(result);
         }
     }
 }
