@@ -60,12 +60,15 @@ namespace RoomRentalManagerServer.Application.Services
                 {
                     queryUser = queryUser.Where(x => x.Name.Contains(pagedRequestDto.Search));
                 }
-                queryUser = pagedRequestDto.SortOrder == "desc"
+                if(!string.IsNullOrEmpty(pagedRequestDto.SortOrder) && !string.IsNullOrEmpty(pagedRequestDto.SortBy))
+                {
+                    queryUser = pagedRequestDto.SortOrder == "desc"
                     ? queryUser.OrderByDescending(x => EF.Property<object>(x, pagedRequestDto.SortBy))
                     : queryUser.OrderBy(x => EF.Property<object>(x, pagedRequestDto.SortBy));
+                } 
                 var total = queryUser.Count();
-                var lstUser = queryUser.Skip((pagedRequestDto.Page - 1) * pagedRequestDto.PageSize).Take(pagedRequestDto.PageSize).ToListAsync();
-                var lstUserDto = _mapper.Map<List<UserDto>>(lstUser);
+                var lstUser = await queryUser.Skip((pagedRequestDto.Page - 1) * pagedRequestDto.PageSize).Take(pagedRequestDto.PageSize).ToListAsync();
+                var lstUserDto = lstUser.Select(user => _mapper.Map<UserDto>(user)).ToList();
                 return new PagedResultDto<UserDto>(lstUserDto, total);
             }
             catch (Exception ex)

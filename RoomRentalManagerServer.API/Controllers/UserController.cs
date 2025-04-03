@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RoomRentalManagerServer.Application.Common;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 
@@ -25,8 +26,9 @@ namespace RoomRentalManagerServer.API.Controllers
             };
             return Ok(res);
         }
-        [HttpGet("editingPopupRead")]
-        public async Task<IActionResult> EditingPopupRead([FromQuery] PagedRequestDto requestDto)
+        [HttpPost("editingPopupRead")]
+        [ProducesResponseType(typeof(PagedResultDto<UserDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> EditingPopupRead([FromBody] PagedRequestDto requestDto)
         {
             var result = await _userAppService.GetAllUsersAsync(requestDto);
             return Ok(result);
