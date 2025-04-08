@@ -10,14 +10,14 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
     public class CreateOrEditUserDto
     {
         public long? Id { get; set; }
-        public int RoleGroupId { get; set; }
+        public string RoleGroupId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-        public long ProvinceId { get; set; }
-        public long DistrictId { get; set; }
-        public long WardId { get; set; }
+        public string ProvinceId { get; set; }
+        public string DistrictId { get; set; }
+        public string WardId { get; set; }
         public string Address { get; set; }
-        public long IDCard { get; set; }
+        public string IDCard { get; set; }
         public string Job { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; }

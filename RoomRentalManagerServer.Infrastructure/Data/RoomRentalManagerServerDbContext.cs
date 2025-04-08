@@ -1,12 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RoomRentalManagerServer.Domain.ModelEntities.Contracts;
+using RoomRentalManagerServer.Domain.ModelEntities.Districts;
 using RoomRentalManagerServer.Domain.ModelEntities.Equipments;
 using RoomRentalManagerServer.Domain.ModelEntities.ImageDescriptions;
 using RoomRentalManagerServer.Domain.ModelEntities.Invoices;
 using RoomRentalManagerServer.Domain.ModelEntities.PaymentAmount;
+using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomEquipments;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomRentals;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
+using RoomRentalManagerServer.Domain.ModelEntities.Wards;
 namespace RoomRentalManagerServer.Infrastructure.Data;
 
 public class RoomRentalManagerServerDbContext : DbContext
@@ -21,6 +24,9 @@ public class RoomRentalManagerServerDbContext : DbContext
     public DbSet<Payment> Payments { get; set; }
     public DbSet<RoomEquipment> RoomEquipments { get; set; }
     public DbSet<Equipment> Equipments { get; set; }
+    public DbSet<Province> Province { get; set; }
+    public DbSet<District> District { get; set; }
+    public DbSet<Ward> Ward { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
