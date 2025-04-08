@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Domain.Interfaces.ProvinceInterface;
+using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -15,6 +17,20 @@ namespace RoomRentalManagerServer.Application.Services
             _logger = logger;
             _mapper = mapper;
             _provinceRepository = provinceRepository;
+        }
+
+        public async Task<List<Province>> GetAllProvincesAsync()
+        {
+            try
+            {
+                var provincesQuery = await _provinceRepository.GetAllQueryAsync();
+                return await provincesQuery.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting all provinces");
+                throw;
+            }
         }
     }
 }

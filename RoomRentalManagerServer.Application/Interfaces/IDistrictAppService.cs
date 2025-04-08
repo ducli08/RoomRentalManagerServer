@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RoomRentalManagerServer.Domain.ModelEntities.Districts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
 {
     public interface IDistrictAppService
     {
+        Task<IQueryable<District>> GetAllDistrictsAsync(string? provinceCode);
     }
 }
