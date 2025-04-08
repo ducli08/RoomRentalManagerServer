@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Infrastructure.Data;
 using RoomRentalManagerServer.Infrastructure.Repositories.UserRepository;
+using RoomRentalManagerServer.Application.Model.UsersModel.UserProfileMapper;
 using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,7 @@ builder.Services.AddDbContext<RoomRentalManagerServerDbContext>(options =>
 // khởi tạo các controller
 builder.Services.AddControllers();
 // khởi tạo objectmaper
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
