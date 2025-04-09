@@ -9,6 +9,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
 {
     public interface IDistrictAppService
     {
-        Task<IQueryable<District>> GetAllDistrictsAsync(string? provinceCode);
+        Task<List<District>> GetAllDistrictsAsync(string? provinceCode);
     }
 }

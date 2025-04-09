@@ -9,6 +9,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
 {
     public interface IWardAppService
     {
-        Task<IQueryable<Ward>> GetAllWardsAsync(string? districtCode);
+        Task<List<Ward>> GetAllWardsAsync(string? districtCode);
     }
 }

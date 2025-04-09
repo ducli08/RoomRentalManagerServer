@@ -18,7 +18,7 @@ namespace RoomRentalManagerServer.Application.Services
             _wardRepository = wardRepository;
         }
 
-        public async Task<IQueryable<Ward>> GetAllWardsAsync(string? districtCode)
+        public async Task<List<Ward>> GetAllWardsAsync(string? districtCode)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace RoomRentalManagerServer.Application.Services
                 {
                     wardQuery = wardQuery.Where(d => d.DistrictCode == districtCode);
                 }
-                return wardQuery;
+                return wardQuery.ToList();
             }
             catch (Exception ex)
             {

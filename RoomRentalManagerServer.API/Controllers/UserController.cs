@@ -80,19 +80,5 @@ namespace RoomRentalManagerServer.API.Controllers
             }).ToList();
             return selectList;
         }
-
-        [HttpGet("set")]
-        public async Task<IActionResult> SetAsync()
-        {
-            await _redisCacheService.SetAsync("test-key", "Hello Redis from Controller!", TimeSpan.FromMinutes(5));
-            return Ok("Set OK");
-        }
-
-        [HttpGet("get")]
-        public async Task<IActionResult> GetAsync()
-        {
-            var value = await _redisCacheService.GetAsync("test-key");
-            return Ok(value ?? "No value found");
-        }
     }
 }
