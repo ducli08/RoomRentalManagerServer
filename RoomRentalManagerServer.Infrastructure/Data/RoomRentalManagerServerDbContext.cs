@@ -6,6 +6,8 @@ using RoomRentalManagerServer.Domain.ModelEntities.ImageDescriptions;
 using RoomRentalManagerServer.Domain.ModelEntities.Invoices;
 using RoomRentalManagerServer.Domain.ModelEntities.PaymentAmount;
 using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
+using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
+using RoomRentalManagerServer.Domain.ModelEntities.Roles;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomEquipments;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomRentals;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
@@ -27,6 +29,8 @@ public class RoomRentalManagerServerDbContext : DbContext
     public DbSet<Province> Province { get; set; }
     public DbSet<District> District { get; set; }
     public DbSet<Ward> Ward { get; set; }
+    public DbSet<RoleGroup> RoleGroup { get; set; }
+    public DbSet<Role> Role { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

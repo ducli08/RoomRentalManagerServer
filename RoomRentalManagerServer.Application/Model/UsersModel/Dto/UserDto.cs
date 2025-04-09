@@ -52,5 +52,8 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
         
         [Display(Name = "Phương tiện", Order = 12)]
         public string BikeId { get; set; }
+
+        [Display(Name = "Số điện thoại", Order = 13)]
+        public string PhoneNumber { get; set; }
     }
 }

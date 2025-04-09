@@ -59,5 +59,9 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
         [Column("bikeId")]
         [Display(Name = "Phương tiện", Order = 12)]
         public string BikeId { get; set; }
+
+        [Column("phoneNumber")]
+        [Display(Name = "Số điện thoại", Order = 13)]
+        public string PhoneNumber { get; set; }
     }
 }

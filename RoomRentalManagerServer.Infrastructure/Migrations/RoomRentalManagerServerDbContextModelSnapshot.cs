@@ -387,6 +387,98 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                     b.ToTable("provinces");
                 });
 
+            modelBuilder.Entity("RoomRentalManagerServer.Domain.ModelEntities.RoleGroups.RoleGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("createdAt");
+
+                    b.Property<string>("CreatorUser")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("creatorUser");
+
+                    b.Property<string>("Descriptions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("descriptions");
+
+                    b.Property<string>("LastUpdateUser")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("lastUpdateUser");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.PrimitiveCollection<List<int>>("RoleIds")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("roleId");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("roleGroup");
+                });
+
+            modelBuilder.Entity("RoomRentalManagerServer.Domain.ModelEntities.Roles.Role", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("createdAt");
+
+                    b.Property<string>("CreatorUser")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("creatorUser");
+
+                    b.Property<string>("LastUpdateUser")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("lastUpdateUser");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("role");
+                });
+
             modelBuilder.Entity("RoomRentalManagerServer.Domain.ModelEntities.RoomEquipments.RoomEquipment", b =>
                 {
                     b.Property<long>("Id")
@@ -546,6 +638,11 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("password");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phoneNumber");
 
                     b.Property<long>("ProvinceId")
                         .HasColumnType("bigint")
