@@ -5,8 +5,12 @@ using RoomRentalManagerServer.Infrastructure.Data;
 using RoomRentalManagerServer.Infrastructure.Repositories.UserRepository;
 using RoomRentalManagerServer.Application.Model.UsersModel.UserProfileMapper;
 using System.Reflection;
+using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
+using RoomRentalManagerServer.Infrastructure.RedisCache;
 var builder = WebApplication.CreateBuilder(args);
-
+//cấu hình redis
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+builder.Configuration["Redis:ConnectionString"] = "localhost:6379";
 // khởi tạo kết nối postgredb
 builder.Services.AddDbContext<RoomRentalManagerServerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

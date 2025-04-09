@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using RoomRentalManagerServer.Application.Common;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
+using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 
 namespace RoomRentalManagerServer.API.Controllers
 {
@@ -14,12 +15,15 @@ namespace RoomRentalManagerServer.API.Controllers
         public readonly IProvinceAppService _provinceAppService;
         public readonly IDistrictAppService _districtAppService;
         public readonly IWardAppService _wardAppService;
-        public UserController(IUserAppService userAppService, IProvinceAppService provinceAppService, IDistrictAppService districtAppService, IWardAppService wardAppService)
+        public readonly IRedisCacheService _redisCacheService;
+        public UserController(IUserAppService userAppService, IProvinceAppService provinceAppService, IDistrictAppService districtAppService,
+            IWardAppService wardAppService, IRedisCacheService redisCacheService)
         {
             _userAppService = userAppService;
             _provinceAppService = provinceAppService;
             _districtAppService = districtAppService;
             _wardAppService = wardAppService;
+            _redisCacheService = redisCacheService;
         }
         [HttpPost("createOrEditUser")]
         public async Task<ActionResult> CreateOrEditUser(CreateOrEditUserDto input)
@@ -75,6 +79,20 @@ namespace RoomRentalManagerServer.API.Controllers
                 Text = w.Name
             }).ToList();
             return selectList;
+        }
+
+        [HttpGet("set")]
+        public async Task<IActionResult> SetAsync()
+        {
+            await _redisCacheService.SetAsync("test-key", "Hello Redis from Controller!", TimeSpan.FromMinutes(5));
+            return Ok("Set OK");
+        }
+
+        [HttpGet("get")]
+        public async Task<IActionResult> GetAsync()
+        {
+            var value = await _redisCacheService.GetAsync("test-key");
+            return Ok(value ?? "No value found");
         }
     }
 }
