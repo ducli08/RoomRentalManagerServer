@@ -8,7 +8,7 @@ namespace RoomRentalManagerServer.Domain.Interfaces.RedisCache
 {
     public interface IRedisCacheService
     {
-        Task SetAsync(string key, string value, TimeSpan? expiry = null);
-        Task<string?> GetAsync(string key);
+        Task SetAsync<T>(string key, List<T> value, TimeSpan? expiry = null);
+        Task<List<T>> GetAsync<T>(string key);
     }
 }

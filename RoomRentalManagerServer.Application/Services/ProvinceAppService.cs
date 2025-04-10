@@ -30,11 +30,11 @@ namespace RoomRentalManagerServer.Application.Services
         {
             try
             {
-                var value = await _redisCacheService.GetAsync(_configuration["Redis:Keys:Province"]);
+                var value = await _redisCacheService.GetAsync<Province>(_configuration["Redis:Keys:Province"]);
                 var provinces = new List<Province>();
                 if (value != null)
                 {
-                    provinces = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Province>>(value);
+                    provinces = value;
                 }
                 else
                 {
@@ -42,8 +42,7 @@ namespace RoomRentalManagerServer.Application.Services
                     provinces = await provincesQuery.ToListAsync();
                     if (provinces != null)
                     {
-                        var json = Newtonsoft.Json.JsonConvert.SerializeObject(provinces);
-                        await _redisCacheService.SetAsync(_configuration["Redis:Keys:Province"], json, TimeSpan.FromMinutes(30));
+                        await _redisCacheService.SetAsync<Province>(_configuration["Redis:Keys:Province"], provinces, TimeSpan.FromMinutes(30));
                     }
                 }
                 return provinces;

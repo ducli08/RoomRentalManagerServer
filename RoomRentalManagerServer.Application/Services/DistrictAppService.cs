@@ -30,27 +30,36 @@ namespace RoomRentalManagerServer.Application.Services
         {
             try
             {
-                var value = await _redisCacheService.GetAsync(_configuration["Redis:Keys:District"]);
-                var districts = new List<District>();
-                if (value != null)
+                var key = _configuration["Redis:Keys:District"];
+                if (!string.IsNullOrEmpty(key))
                 {
-                    districts = Newtonsoft.Json.JsonConvert.DeserializeObject<List<District>>(value);
+                    var value = await _redisCacheService.GetAsync<District>(key);
+                    var districts = new List<District>();
+                    if (value != null)
+                    {
+                        districts = value;
+                    }
+                    else
+                    {
+                        var districtsQuery = await _districtRepository.GetAllQueryAsync();
+                        districts = await districtsQuery.ToListAsync();
+                        if (districts != null)
+                        {
+                            await _redisCacheService.SetAsync<District>(key, districts, TimeSpan.FromMinutes(30));
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(provinceCode))
+                    {
+                        districts = districts?.FindAll(x => x.ProvinceCode == provinceCode);
+                    }
+                    return districts;
                 }
                 else
                 {
-                    var districtsQuery = await _districtRepository.GetAllQueryAsync();
-                    districts = await districtsQuery.ToListAsync();
-                    if (districts != null)
-                    {
-                        var json = Newtonsoft.Json.JsonConvert.SerializeObject(districts);
-                        await _redisCacheService.SetAsync(_configuration["Redis:Keys:District"], json, TimeSpan.FromMinutes(30));
-                    }
-                }
-                if (!string.IsNullOrEmpty(provinceCode))
-                {
-                    districts = districts.FindAll(x => x.ProvinceCode == provinceCode);
-                }
-                return districts;
+                    _logger.LogError("Redis key for District is not configured.");
+                    return new List<District>();
+                }    
+                
             }
             catch (Exception ex)
             {

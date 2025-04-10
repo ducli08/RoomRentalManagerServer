@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using StackExchange.Redis;
 
@@ -14,14 +15,24 @@ namespace RoomRentalManagerServer.Infrastructure.RedisCache
             _database = redis.GetDatabase();
         }
 
-        public async Task SetAsync(string key, string value, TimeSpan? expiry = null)
+        public async Task SetAsync<T>(string key, List<T> value, TimeSpan? expiry = null)
         {
-            await _database.StringSetAsync(key, value, expiry);
+            var json = JsonConvert.SerializeObject(value);
+            await _database.StringSetAsync(key, json, expiry);
         }
 
-        public async Task<string?> GetAsync(string key)
+        public async Task<List<T>> GetAsync<T>(string key)
         {
-            return await _database.StringGetAsync(key);
+            var json = await _database.StringGetAsync(key);
+            if (string.IsNullOrEmpty(json))
+            {
+                return new List<T>();
+            }
+            else
+            {
+                return JsonConvert.DeserializeObject<List<T>>(json) ?? new List<T>();
+            }    
+            
         }
     }
 }
