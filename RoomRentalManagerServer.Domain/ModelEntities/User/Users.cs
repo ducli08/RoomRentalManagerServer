@@ -42,7 +42,7 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
 
         [Column("idCard")]
         [Display(Name = "CCCD/CMT", Order = 8)]
-        public long IDCard { get; set; }
+        public string IDCard { get; set; }
 
         [Column("job")]
         [Display(Name = "Công việc", Order = 9)]

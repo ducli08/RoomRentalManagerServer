@@ -251,7 +251,7 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                     districtId = table.Column<string>(type: "text", nullable: false),
                     wardId = table.Column<string>(type: "text", nullable: false),
                     address = table.Column<string>(type: "text", nullable: false),
-                    idCard = table.Column<long>(type: "bigint", nullable: false),
+                    idCard = table.Column<string>(type: "text", nullable: false),
                     job = table.Column<string>(type: "text", nullable: false),
                     dateofbirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     gender = table.Column<string>(type: "text", nullable: false),

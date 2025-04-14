@@ -13,7 +13,7 @@ using RoomRentalManagerServer.Infrastructure.Data;
 namespace RoomRentalManagerServer.Infrastructure.Migrations
 {
     [DbContext(typeof(RoomRentalManagerServerDbContext))]
-    [Migration("20250414072240_Initial_Database 20250414")]
+    [Migration("20250414103008_Initial_Database 20250414")]
     partial class Initial_Database20250414
     {
         /// <inheritdoc />
@@ -624,8 +624,9 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("gender");
 
-                    b.Property<long>("IDCard")
-                        .HasColumnType("bigint")
+                    b.Property<string>("IDCard")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("idCard");
 
                     b.Property<string>("Job")

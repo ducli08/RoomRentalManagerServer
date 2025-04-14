@@ -621,8 +621,9 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("gender");
 
-                    b.Property<long>("IDCard")
-                        .HasColumnType("bigint")
+                    b.Property<string>("IDCard")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("idCard");
 
                     b.Property<string>("Job")
