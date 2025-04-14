@@ -13,8 +13,8 @@ using RoomRentalManagerServer.Infrastructure.Data;
 namespace RoomRentalManagerServer.Infrastructure.Migrations
 {
     [DbContext(typeof(RoomRentalManagerServerDbContext))]
-    [Migration("20250409062539_InitialCreate_20250409")]
-    partial class InitialCreate_20250409
+    [Migration("20250414072240_Initial_Database 20250414")]
+    partial class Initial_Database20250414
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -609,8 +609,9 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("dateofbirth");
 
-                    b.Property<long>("DistrictId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("DistrictCode")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("districtId");
 
                     b.Property<string>("Email")
@@ -647,16 +648,18 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phoneNumber");
 
-                    b.Property<long>("ProvinceId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("ProvinceCode")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("provinceId");
 
                     b.Property<int>("RoleGroupId")
                         .HasColumnType("integer")
                         .HasColumnName("roleGroupId");
 
-                    b.Property<long>("WardId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("WardCode")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("wardId");
 
                     b.HasKey("Id");

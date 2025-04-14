@@ -26,15 +26,15 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
 
         [Column("provinceId")]
         [Display(Name = "Tỉnh/TP", Order = 4)]
-        public long ProvinceId { get; set; }
+        public string ProvinceCode { get; set; }
 
         [Column("districtId")]
         [Display(Name = "Quận/Huyện", Order = 5)]
-        public long DistrictId { get; set; }
+        public string DistrictCode { get; set; }
 
         [Column("wardId")]
         [Display(Name = "Xã/Phường", Order = 6)]
-        public long WardId { get; set; }
+        public string WardCode { get; set; }
 
         [Column("address")]
         [Display(Name = "Địa chỉ cụ thể", Order = 7)]

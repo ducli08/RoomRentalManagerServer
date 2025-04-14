@@ -606,8 +606,9 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("dateofbirth");
 
-                    b.Property<long>("DistrictId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("DistrictCode")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("districtId");
 
                     b.Property<string>("Email")
@@ -644,16 +645,18 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phoneNumber");
 
-                    b.Property<long>("ProvinceId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("ProvinceCode")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("provinceId");
 
                     b.Property<int>("RoleGroupId")
                         .HasColumnType("integer")
                         .HasColumnName("roleGroupId");
 
-                    b.Property<long>("WardId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("WardCode")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("wardId");
 
                     b.HasKey("Id");

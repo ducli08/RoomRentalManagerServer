@@ -19,15 +19,15 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
         public string Email { get; set; }
         
         [Display(Name = "Tỉnh/TP", Order = 4)]
-        public long ProvinceId { get; set; }
+        public string ProvinceCode { get; set; }
 
        
         [Display(Name = "Quận/Huyện", Order = 5)]
-        public long DistrictId { get; set; }
+        public string DistrictCode { get; set; }
 
         
         [Display(Name = "Xã/Phường", Order = 6)]
-        public long WardId { get; set; }
+        public string WardCode { get; set; }
 
         
         [Display(Name = "Địa chỉ cụ thể", Order = 7)]

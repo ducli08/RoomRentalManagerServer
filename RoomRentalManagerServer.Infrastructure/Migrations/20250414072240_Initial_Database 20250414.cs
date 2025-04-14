@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RoomRentalManagerServer.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate_20250409 : Migration
+    public partial class Initial_Database20250414 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -247,9 +247,9 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                     name = table.Column<string>(type: "text", nullable: false),
                     email = table.Column<string>(type: "text", nullable: false),
                     password = table.Column<string>(type: "text", nullable: false),
-                    provinceId = table.Column<long>(type: "bigint", nullable: false),
-                    districtId = table.Column<long>(type: "bigint", nullable: false),
-                    wardId = table.Column<long>(type: "bigint", nullable: false),
+                    provinceId = table.Column<string>(type: "text", nullable: false),
+                    districtId = table.Column<string>(type: "text", nullable: false),
+                    wardId = table.Column<string>(type: "text", nullable: false),
                     address = table.Column<string>(type: "text", nullable: false),
                     idCard = table.Column<long>(type: "bigint", nullable: false),
                     job = table.Column<string>(type: "text", nullable: false),

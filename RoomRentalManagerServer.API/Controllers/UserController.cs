@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using RoomRentalManagerServer.Application.Common;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
+using RoomRentalManagerServer.Application.Services;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
+using System.Diagnostics;
 
 namespace RoomRentalManagerServer.API.Controllers
 {
@@ -16,14 +18,18 @@ namespace RoomRentalManagerServer.API.Controllers
         public readonly IDistrictAppService _districtAppService;
         public readonly IWardAppService _wardAppService;
         public readonly IRedisCacheService _redisCacheService;
+        public readonly IRoleGroupAppService _roleGroupAppService;
+        public readonly ILogger<UserController> _logger;
         public UserController(IUserAppService userAppService, IProvinceAppService provinceAppService, IDistrictAppService districtAppService,
-            IWardAppService wardAppService, IRedisCacheService redisCacheService)
+            IWardAppService wardAppService, IRedisCacheService redisCacheService, ILogger<UserController> logger, IRoleGroupAppService roleGroupAppService)
         {
             _userAppService = userAppService;
             _provinceAppService = provinceAppService;
             _districtAppService = districtAppService;
             _wardAppService = wardAppService;
             _redisCacheService = redisCacheService;
+            _roleGroupAppService = roleGroupAppService;
+            _logger = logger;
         }
         [HttpPost("createOrEditUser")]
         public async Task<ActionResult> CreateOrEditUser(CreateOrEditUserDto input)
@@ -48,35 +54,59 @@ namespace RoomRentalManagerServer.API.Controllers
         [HttpPost("getAllProvince")]
         public async Task<List<SelectListItem>> GetAllProvinceAsync()
         {
+            Stopwatch st = new Stopwatch();
+            st.Start();
             var provinceQuery = await _provinceAppService.GetAllProvincesAsync();
             var selectList = provinceQuery.Select(p => new SelectListItem
             {
                 Value = p.Code,
                 Text = p.Name
             }).ToList();
+            st.Stop();
+            _logger.LogInformation($"Total time to get data Provinces: {st.ElapsedMilliseconds} miliseconds");
             return selectList;
         }
 
         [HttpPost("getAllDistrict")]
         public async Task<List<SelectListItem>> GetAllDistrictAsync(string? provinceCode)
         {
+            Stopwatch st = new Stopwatch();
+            st.Start();
             var districtQuery = await _districtAppService.GetAllDistrictsAsync(provinceCode);
             var selectList = districtQuery.Select(d => new SelectListItem
             {
                 Value = d.Code,
                 Text = d.Name
             }).ToList();
+            st.Stop();
+            _logger.LogInformation($"Total time to get data Districts: {st.ElapsedMilliseconds} miliseconds");
             return selectList;
         }
 
         [HttpPost("getAllWard")]
         public async Task<List<SelectListItem>> GetAllWardAsync(string? districtCode)
         {
+            Stopwatch st = new Stopwatch();
+            st.Start();
             var wardQuery = await _wardAppService.GetAllWardsAsync(districtCode);
             var selectList = wardQuery.Select(w => new SelectListItem
             {
                 Value = w.Code,
                 Text = w.Name
+            }).ToList();
+            st.Stop();
+            _logger.LogInformation($"Total time to get data Wards: {st.ElapsedMilliseconds} miliseconds");
+            return selectList;
+        }
+
+        [HttpPost("getAllRoleGroup")]
+        public async Task<List<SelectListItem>> GetAllRoleGroupAsync()
+        {
+            var roleGroupQuery = await _roleGroupAppService.GetAllRoleGroupAsync();
+            var selectList = roleGroupQuery.Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.Name
             }).ToList();
             return selectList;
         }

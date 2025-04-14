@@ -6,6 +6,7 @@ using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Domain.Interfaces.ProvinceInterface;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
+using System.Diagnostics;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -30,20 +31,32 @@ namespace RoomRentalManagerServer.Application.Services
         {
             try
             {
+                Stopwatch stC = new Stopwatch();
+                stC.Start();
+                Stopwatch st = new Stopwatch();
+                st.Start();
                 var value = await _redisCacheService.GetAsync<Province>(_configuration["Redis:Keys:Province"]);
                 var provinces = new List<Province>();
-                if (value != null)
+                if (value != null && value?.Count != 0)
                 {
                     provinces = value;
+                    stC.Stop();
+                    _logger.LogInformation($"GetAllProvincesAsync from Redis Cache: {stC.ElapsedMilliseconds} ms");
                 }
                 else
                 {
                     var provincesQuery = await _provinceRepository.GetAllQueryAsync();
                     provinces = await provincesQuery.ToListAsync();
+                    st.Stop();
+                    _logger.LogInformation($"GetAllProvincesAsync from Database: {st.ElapsedMilliseconds} ms");
                     if (provinces != null)
                     {
+                        st.Start();
                         await _redisCacheService.SetAsync<Province>(_configuration["Redis:Keys:Province"], provinces, TimeSpan.FromMinutes(30));
+                        st.Stop();
+                        _logger.LogInformation($"Time to set cache Province into Redis {st.ElapsedMilliseconds} ms");
                     }
+                    
                 }
                 return provinces;
             }

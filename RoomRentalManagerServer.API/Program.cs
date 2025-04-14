@@ -7,6 +7,7 @@ using RoomRentalManagerServer.Application.Model.UsersModel.UserProfileMapper;
 using System.Reflection;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using RoomRentalManagerServer.Infrastructure.RedisCache;
+using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 //cấu hình redis
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
@@ -60,6 +61,19 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
         });
+});
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var options = new ConfigurationOptions
+    {
+        EndPoints = { configuration["Redis:ConnectionString"] },
+        ConnectTimeout = int.Parse(configuration["Redis:ConnectTimeout"] ?? "5000"),
+        SyncTimeout = int.Parse(configuration["Redis:SyncTimeout"] ?? "10000"),
+        AbortOnConnectFail = false
+    };
+    return ConnectionMultiplexer.Connect(options);
 });
 var app = builder.Build();
 
