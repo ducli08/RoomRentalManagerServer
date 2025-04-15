@@ -55,5 +55,8 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
 
         [Display(Name = "Số điện thoại", Order = 13)]
         public string PhoneNumber { get; set; }
+
+        [Display(Name = "Quyền", Order = 14)]
+        public string RoleGroupId { get; set; }
     }
 }
