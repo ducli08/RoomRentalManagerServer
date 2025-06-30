@@ -75,7 +75,7 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
                 _logger.LogError($"Failed to get user by id: {ex.Message}");
                 throw;
             }
-            
+
         }
 
         public async Task<bool> UpdateAsync(Users user)
@@ -92,7 +92,30 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
                 _logger.LogError($"Failed to update user: {ex.Message}");
                 throw;
             }
-            
+
+        }
+
+        public async Task<Users> GetUserByEmail(string email)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Email == email);
+                if (user != null)
+                {
+                    return user;
+                }
+                else
+                {
+                    return null;
+                }    
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to check if user exists: {ex.Message}");
+                throw;
+            }
         }
     }
 }

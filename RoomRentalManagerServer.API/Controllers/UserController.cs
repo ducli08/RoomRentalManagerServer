@@ -45,7 +45,7 @@ namespace RoomRentalManagerServer.API.Controllers
         }
         [HttpPost("editingPopupRead")]
         [ProducesResponseType(typeof(PagedResultDto<UserDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> EditingPopupRead([FromBody] PagedRequestDto requestDto)
+        public async Task<IActionResult> EditingPopupRead([FromBody] PagedRequestDto<UserFilterDto> requestDto)
         {
             var result = await _userAppService.GetAllUsersAsync(requestDto);
             return Ok(result);
@@ -109,6 +109,12 @@ namespace RoomRentalManagerServer.API.Controllers
                 Text = x.Name
             }).ToList();
             return selectList;
+        }
+
+        [HttpDelete("deleteUser")]
+        public async Task<bool> DeleteUser(long id)
+        {
+            return await _userAppService.DeleteUserAsync(id);
         }
     }
 }

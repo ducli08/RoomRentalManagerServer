@@ -1,0 +1,45 @@
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using RoomRentalManagerServer.Application.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace RoomRentalManagerServer.Application.Services
+{
+    public class JwtTokenAppService : IJwtTokenAppService
+    {
+        private readonly IConfiguration _configuration;
+        public JwtTokenAppService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+        public string GenerateToken(long userId, DateTime expiresTime)
+        {
+            try
+            {
+                var jwtSettings = _configuration.GetSection("Jwt");
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+                var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var claims = new[]
+                {
+                new Claim(JwtRegisteredClaimNames.Sub, "userId"), // Replace with actual user ID
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+                var token = new JwtSecurityToken(
+                    issuer: jwtSettings["Issuer"],
+                    audience: jwtSettings["Audience"],
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpiresInMinutes"])),
+                    signingCredentials: credentials
+                );
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+           
+        }
+    }
+}
