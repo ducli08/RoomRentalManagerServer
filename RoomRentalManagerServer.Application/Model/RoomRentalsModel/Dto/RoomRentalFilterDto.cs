@@ -2,16 +2,15 @@
 
 namespace RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto
 {
-    public class CreateOrEditRoomRentalDto
+    public class RoomRentalFilterDto
     {
-        public long? Id { get; set; }
-        public int RoomNumber { get; set; }
+        public string RoomNumber { get; set; }
         public RoomType RoomType { get; set; }
-        public double Price { get; set; }
+        public string PriceStart { get; set; }
+        public string PriceEnd { get; set; }
         public RoomStatus StatusRoom { get; set; }
         public string Note { get; set; }
-        public double Area { get; set; }
-        public List<int>? ImagesDescription { get; set; }
+        public string Area { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         public string CreatorUser { get; set; }

@@ -38,7 +38,7 @@ namespace RoomRentalManagerServer.API.Controllers
             {
                 return Unauthorized(new { message = "Invalid username or password" });
             }
-            var token = _jwtTokenAppService.GenerateToken(user.Id, expires);
+            var token = _jwtTokenAppService.GenerateToken(user.Id, user.Name, expires);
 
             // Optionally cache user info
             var expiry = rememberMe ? TimeSpan.FromDays(7) : TimeSpan.FromHours(1);

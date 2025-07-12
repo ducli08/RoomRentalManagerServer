@@ -1,0 +1,88 @@
+﻿using Microsoft.Extensions.Logging;
+using RoomRentalManagerServer.Application.Common.CommonDto;
+using RoomRentalManagerServer.Application.Interfaces;
+
+namespace RoomRentalManagerServer.Application.Common.CommonAppService
+{
+    public class CommonAppService : ICommonAppService
+    {
+        private readonly ILogger<CommonAppService> _logger;
+        private readonly IWardAppService _wardAppService;
+        private readonly IProvinceAppService _provinceAppService;
+        private readonly IDistrictAppService _districtAppService;
+        private readonly IUserAppService _userAppService;
+        private readonly IRoomRentalAppService _roomRentalAppService;
+        public CommonAppService(ILogger<CommonAppService> logger, IWardAppService wardAppService, IProvinceAppService provinceAppService,
+            IDistrictAppService districtAppService, IUserAppService userAppService, IRoomRentalAppService roomRentalAppService)
+        {
+            _logger = logger;
+            _wardAppService = wardAppService;
+            _provinceAppService = provinceAppService;
+            _districtAppService = districtAppService;
+            _userAppService = userAppService;
+            _roomRentalAppService = roomRentalAppService;
+        }
+
+        public async Task<List<SelectListItemDto>> GetCustomSelectListItem(string typeSelect, string cascadeValue)
+        {
+            var selectListItemDtos = new List<SelectListItemDto>();
+            switch (typeSelect)
+            {
+                case "provinces":
+                    var provinces = await _provinceAppService.GetAllProvincesAsync();
+                    provinces.ForEach(p => selectListItemDtos.Add(new SelectListItemDto
+                    {
+                        Value = p.Code,
+                        Text = p.Name
+                    }));
+                    break;
+                case "districts":
+                    var districts = await _districtAppService.GetAllDistrictsAsync(cascadeValue);
+                    districts.ForEach(d => selectListItemDtos.Add(new SelectListItemDto
+                    {
+                        Value = d.Code,
+                        Text = d.Name
+                    }));
+                    break;
+                case "wards":
+                    var wards = await _wardAppService.GetAllWardsAsync(cascadeValue);
+                    wards.ForEach(w => selectListItemDtos.Add(new SelectListItemDto
+                    {
+                        Value = (w.Code != null ? w.Code : ""),
+                        Text = (w.Name != null ? w.Name : "")
+                    }));
+                    break;
+                case "user":
+                    var users = await _userAppService.GetAllUserForSelectListItem();
+                    users.ForEach(u => selectListItemDtos.Add(new SelectListItemDto
+                    {
+                        Value = u.Name.ToString(),
+                        Text = u.Name
+                    }));
+                    break;
+                case "roomRental":
+                    var roomRentals = await _roomRentalAppService.GetAllRoomRentalForSelectListItem();
+                    roomRentals.ForEach(r => selectListItemDtos.Add(new SelectListItemDto
+                    {
+                        Value = r.Id.ToString(),
+                        Text = r.RoomNumber.ToString()
+                    }));
+                    break;
+                default:
+                    throw new ArgumentException("Invalid typeSelect provided");
+            }
+            return selectListItemDtos;
+        }
+
+        public List<SelectListItemDto> GetCustomSelectListFromEnum<TEnum>() where TEnum : Enum
+        {
+            return Enum.GetValues(typeof(TEnum))
+                .Cast<TEnum>()
+                .Select(e => new SelectListItemDto
+                {
+                    Value = Convert.ToInt32(e).ToString(),
+                    Text = e.ToString()
+                }).ToList();
+        }
+    }
+}

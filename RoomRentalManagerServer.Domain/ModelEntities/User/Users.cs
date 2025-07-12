@@ -63,5 +63,21 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
         [Column("phoneNumber")]
         [Display(Name = "Số điện thoại", Order = 13)]
         public string PhoneNumber { get; set; }
+
+        [Column("createdDate")]
+        [Display(Name = "Ngày tạo", Order = 14)]
+        public DateTime CreatedDate { get; set; }
+
+        [Column("updatedDate")]
+        [Display(Name = "Ngày cập nhật", Order = 15)]
+        public DateTime UpdatedDate { get; set; }
+
+        [Column("creatorUser")]
+        [Display(Name = "Người tạo", Order = 16)]
+        public string CreatorUser { get; set; }
+
+        [Column("lastUpdateUser")]
+        [Display(Name = "Người cập nhật", Order = 17)]
+        public string LastUpdateUser { get; set; }
     }
 }

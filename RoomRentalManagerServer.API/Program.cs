@@ -1,13 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RoomRentalManagerServer.Application.Model.UsersModel.UserProfileMapper;
+using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Infrastructure.Data;
-using RoomRentalManagerServer.Infrastructure.Repositories.UserRepository;
-using RoomRentalManagerServer.Application.Model.UsersModel.UserProfileMapper;
-using System.Reflection;
-using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using RoomRentalManagerServer.Infrastructure.RedisCache;
+using RoomRentalManagerServer.Infrastructure.Repositories.UserRepository;
 using StackExchange.Redis;
+using System.Reflection;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 //cấu hình redis
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
@@ -48,6 +51,7 @@ foreach(var interfaceType in repositoryInterface)
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(x =>
 {
     x.AddServer(new OpenApiServer { Url = "https://localhost:7246" });
@@ -75,6 +79,24 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     };
     return ConnectionMultiplexer.Connect(options);
 });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtSettings = builder.Configuration.GetSection("Jwt");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Key"])
+            )
+        };
+    });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

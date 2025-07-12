@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace RoomRentalManagerServer.Application.Interfaces
 {
-    public interface IJwtTokenAppService
+    public interface ICurrentUserAppService
     {
-        string GenerateToken(long userId, string userName, DateTime expiresTime);
+        long? GetUserId { get; }
+        string UserName { get; }
+        bool IsAuthenticated { get; }
     }
 }

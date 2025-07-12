@@ -9,6 +9,7 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.UserProfileMapper
         {
             CreateMap<Users, CreateOrEditUserDto>().ReverseMap();
             CreateMap<Users, UserDto>().ReverseMap();
+            CreateMap<Users, Users>();
         }
     }
 }

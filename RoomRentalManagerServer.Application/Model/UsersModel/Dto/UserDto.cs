@@ -35,7 +35,7 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
 
        
         [Display(Name = "CCCD/CMT", Order = 8)]
-        public long IDCard { get; set; }
+        public string IDCard { get; set; }
 
         
         [Display(Name = "Công việc", Order = 9)]
@@ -58,5 +58,7 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
 
         [Display(Name = "Quyền", Order = 14)]
         public string RoleGroupId { get; set; }
+
+        public string Password { get; set; }
     }
 }

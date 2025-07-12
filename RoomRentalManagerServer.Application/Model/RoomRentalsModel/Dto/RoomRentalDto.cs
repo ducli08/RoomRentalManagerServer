@@ -5,6 +5,7 @@ namespace RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto
 {
     public class RoomRentalDto
     {
+        public long Id { get; set; }
         [Display(Name = "Số phòng", Order = 1)]
         public int RoomNumber { get; set; }
 

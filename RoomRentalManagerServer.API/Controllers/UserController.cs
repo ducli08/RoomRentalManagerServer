@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using RoomRentalManagerServer.Application.Common;
+using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
-using RoomRentalManagerServer.Application.Services;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using System.Diagnostics;
 
@@ -43,9 +42,9 @@ namespace RoomRentalManagerServer.API.Controllers
             };
             return Ok(res);
         }
-        [HttpPost("editingPopupRead")]
+        [HttpPost("getAllUserAsync")]
         [ProducesResponseType(typeof(PagedResultDto<UserDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> EditingPopupRead([FromBody] PagedRequestDto<UserFilterDto> requestDto)
+        public async Task<IActionResult> GetAllUserAsync([FromBody] PagedRequestDto<UserFilterDto> requestDto)
         {
             var result = await _userAppService.GetAllUsersAsync(requestDto);
             return Ok(result);
@@ -112,9 +111,9 @@ namespace RoomRentalManagerServer.API.Controllers
         }
 
         [HttpDelete("deleteUser")]
-        public async Task<bool> DeleteUser(long id)
+        public async Task DeleteUser(long id)
         {
-            return await _userAppService.DeleteUserAsync(id);
+            await _userAppService.DeleteUserAsync(id);
         }
     }
 }

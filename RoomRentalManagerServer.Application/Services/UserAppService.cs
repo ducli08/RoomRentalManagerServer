@@ -2,13 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using RoomRentalManagerServer.Application.Common;
+using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
-using RoomRentalManagerServer.Application.Model.Login.Dto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
-using System.Linq;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -17,11 +15,13 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly ILogger<UserAppService> _logger;
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
-        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper)
+        private readonly ICurrentUserAppService _currentUserAppService;
+        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService)
         {
             _logger = logger;
             _mapper = mapper;
             _userRepository = userRepository;
+            _currentUserAppService = currentUserAppService;
         }
         public async Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input)
         {
@@ -48,9 +48,9 @@ namespace RoomRentalManagerServer.Application.Services
 
         }
 
-        public async Task<bool> DeleteUserAsync(long id)
+        public async Task DeleteUserAsync(long id)
         {
-            return await _userRepository.DeleteAsync(id);
+            await _userRepository.DeleteAsync(id);
         }
 
         public async Task<PagedResultDto<UserDto>> GetAllUsersAsync(PagedRequestDto<UserFilterDto> pagedRequestDto)
@@ -60,7 +60,11 @@ namespace RoomRentalManagerServer.Application.Services
                 var queryUser = await _userRepository.GetAllQueryAsync();
                 if (!string.IsNullOrEmpty(pagedRequestDto.Filter.NameFilter))
                 {
-                    queryUser = queryUser.Where(x => x.Name.Equals(pagedRequestDto.Filter.NameFilter));
+                    queryUser = queryUser.Where(x =>
+                        EF.Functions.ILike(EF.Functions.Unaccent(x.Name), EF.Functions.Unaccent($"%{pagedRequestDto.Filter.NameFilter}%")) ||
+                        EF.Functions.ILike(EF.Functions.Unaccent(x.Name), EF.Functions.Unaccent($"{pagedRequestDto.Filter.NameFilter}%")) ||
+                        EF.Functions.ILike(EF.Functions.Unaccent(x.Name), EF.Functions.Unaccent($"{pagedRequestDto.Filter.NameFilter}%"))
+                    );
                 }
                 if (!string.IsNullOrEmpty(pagedRequestDto.Filter.ProvinceCodeFilter))
                 {
@@ -76,7 +80,11 @@ namespace RoomRentalManagerServer.Application.Services
                 }
                 if (!string.IsNullOrEmpty(pagedRequestDto.Filter.AddressFilter))
                 {
-                    queryUser = queryUser.Where(x => x.Address.Equals(pagedRequestDto.Filter.AddressFilter));
+                    queryUser = queryUser.Where(x =>
+                        EF.Functions.ILike(EF.Functions.Unaccent(x.Address), EF.Functions.Unaccent($"%{pagedRequestDto.Filter.AddressFilter}%")) ||
+                        EF.Functions.ILike(EF.Functions.Unaccent(x.Address), EF.Functions.Unaccent($"{pagedRequestDto.Filter.AddressFilter}%")) ||
+                        EF.Functions.ILike(EF.Functions.Unaccent(x.Address), EF.Functions.Unaccent($"%{pagedRequestDto.Filter.AddressFilter}"))
+                    );
                 }
                 if (!string.IsNullOrEmpty(pagedRequestDto.Filter.EmailFilter))
                 {
@@ -118,8 +126,15 @@ namespace RoomRentalManagerServer.Application.Services
         {
             try
             {
+                if (!_currentUserAppService.IsAuthenticated)
+                {
+                    throw new UnauthorizedAccessException("User is not authenticated.");
+                }
+                var userId = _currentUserAppService.GetUserId ?? throw new InvalidOperationException("User ID is null.");
                 var hasher = new PasswordHasher<Users>();
                 user.Password = hasher.HashPassword(user, user.Password); // Hash the password before saving
+                user.CreatedDate = user.UpdatedDate = DateTime.UtcNow;
+                user.CreatorUser = user.LastUpdateUser = _currentUserAppService.UserName;
                 await _userRepository.AddAsync(user);
                 return _mapper.Map<UserDto>(user);
             }
@@ -130,11 +145,12 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
-        public async Task<bool> UpdateAsync(Users user)
+        public async Task UpdateAsync(Users user)
         {
             try
             {
-                return await _userRepository.UpdateAsync(user);
+                user.LastUpdateUser = _currentUserAppService.UserName;
+                await _userRepository.UpdateAsync(user);
             }
             catch (Exception ex)
             {
@@ -148,7 +164,7 @@ namespace RoomRentalManagerServer.Application.Services
             try
             {
                 var user = await _userRepository.GetUserByEmail(username);
-                if(user != null)
+                if (user != null)
                 {
                     var hasher = new PasswordHasher<Users>();
                     var result = hasher.VerifyHashedPassword(user, user.Password, password);
@@ -170,7 +186,21 @@ namespace RoomRentalManagerServer.Application.Services
             {
                 throw;
             }
-            
+
+        }
+
+        public async Task<List<Users>> GetAllUserForSelectListItem()
+        {
+            try
+            {
+                var queryGetAllUser = await _userRepository.GetAllQueryAsync();
+                return queryGetAllUser.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get all user for selectListItem: {ex.Message}");
+                throw;
+            }
         }
     }
 }

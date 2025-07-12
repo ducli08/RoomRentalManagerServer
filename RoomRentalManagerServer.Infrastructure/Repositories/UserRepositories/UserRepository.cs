@@ -3,11 +3,6 @@ using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
 using RoomRentalManagerServer.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
 {
@@ -20,13 +15,12 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
             _context = context;
             _logger = logger;
         }
-        public async Task<Users> AddAsync(Users user)
+        public async Task AddAsync(Users user)
         {
             try
             {
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
-                return user;
             }
             catch (Exception ex)
             {
@@ -35,14 +29,14 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
             }
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        public async Task DeleteAsync(long id)
         {
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
-                if (user == null) return false;
-                _context.Users.Remove(user);
-                return await _context.SaveChangesAsync() > 0;
+                var existUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+                ArgumentNullException.ThrowIfNull(existUser);
+                _context.Users.Remove(existUser);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -78,14 +72,29 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
 
         }
 
-        public async Task<bool> UpdateAsync(Users user)
+        public async Task UpdateAsync(Users user)
         {
             try
             {
-                var data = _context.Users.FirstOrDefault(x => x.Id == user.Id);
-                if (data == null) return false;
-                _context.Users.Update(user);
-                return await _context.SaveChangesAsync() > 0;
+                var existUser = _context.Users.FirstOrDefault(x => x.Id == user.Id);
+                ArgumentNullException.ThrowIfNull(existUser);
+                existUser.RoleGroupId = user.RoleGroupId;
+                existUser.Name = user.Name;
+                existUser.Email = user.Email;
+                existUser.Password = user.Password;
+                existUser.ProvinceCode = user.ProvinceCode;
+                existUser.DistrictCode = user.DistrictCode;
+                existUser.WardCode = user.WardCode;
+                existUser.Address = user.Address;
+                existUser.IDCard = user.IDCard;
+                existUser.Job = user.Job;
+                existUser.DateOfBirth = user.DateOfBirth;
+                existUser.Gender = user.Gender;
+                existUser.BikeId = user.BikeId;
+                existUser.PhoneNumber = user.PhoneNumber;
+                existUser.UpdatedDate = DateTime.UtcNow;
+                existUser.LastUpdateUser = user.LastUpdateUser;
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

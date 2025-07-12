@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RoomRentalManagerServer.Application.Common
+namespace RoomRentalManagerServer.Application.Common.CommonDto
 {
     public class PagedResultDto<T> where T : class
     {

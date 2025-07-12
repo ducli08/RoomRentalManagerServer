@@ -14,7 +14,7 @@ namespace RoomRentalManagerServer.Application.Services
         {
             _configuration = configuration;
         }
-        public string GenerateToken(long userId, DateTime expiresTime)
+        public string GenerateToken(long userId, string userName, DateTime expiresTime)
         {
             try
             {
@@ -23,9 +23,10 @@ namespace RoomRentalManagerServer.Application.Services
                 var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
                 var claims = new[]
                 {
-                new Claim(JwtRegisteredClaimNames.Sub, "userId"), // Replace with actual user ID
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Name, userName.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                };
                 var token = new JwtSecurityToken(
                     issuer: jwtSettings["Issuer"],
                     audience: jwtSettings["Audience"],

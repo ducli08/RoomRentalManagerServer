@@ -6,9 +6,9 @@ namespace RoomRentalManagerServer.Domain.Interfaces.UserInterfaces
     {
         Task<Users?> GetByIdAsync(long id);
         Task<IQueryable<Users>> GetAllQueryAsync();
-        Task<Users> AddAsync(Users user);
-        Task<bool> UpdateAsync(Users user);
-        Task<bool> DeleteAsync(long id);
+        Task AddAsync(Users user);
+        Task UpdateAsync(Users user);
+        Task DeleteAsync(long id);
         Task<Users> GetUserByEmail(string email);
     }
 }
