@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 namespace RoomRentalManagerServer.Application.Common.CommonAppService
 {
@@ -74,7 +76,40 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
             return selectListItemDtos;
         }
 
-        public List<SelectListItemDto> GetCustomSelectListFromEnum<TEnum>() where TEnum : Enum
+        public List<SelectListItemDto> GetEnumSelectListItem(string enumTypeName)
+        {
+            if (string.IsNullOrWhiteSpace(enumTypeName))
+                throw new ArgumentException("Enum type name is required", nameof(enumTypeName));
+
+            // 1. Tìm enum type
+            var enumType = FindEnumType(enumTypeName);
+            if (enumType == null || !enumType.IsEnum)
+                throw new ArgumentException($"Type '{enumTypeName}' is not a valid enum type.");
+
+            // 2. Gọi generic method
+            var method = typeof(CommonAppService)
+                .GetMethod(nameof(GetCustomSelectListFromEnum), BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (method == null)
+                throw new InvalidOperationException("Could not find method GetCustomSelectListFromEnum.");
+
+            var genericMethod = method.MakeGenericMethod(enumType);
+
+            var result = genericMethod.Invoke(this, null);
+            if (result is List<SelectListItemDto> list)
+                return list;
+            else
+                return new List<SelectListItemDto>();
+        }
+
+        private Type FindEnumType(string typeName)
+        {
+            var domainAssembly = typeof(RoomRentalManagerServer.Domain.ModelEntities.User.Users).Assembly;
+            var enumType = domainAssembly.GetTypes()
+                .FirstOrDefault(t => t.IsEnum && t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
+            return enumType;
+        }
+        private List<SelectListItemDto> GetCustomSelectListFromEnum<TEnum>() where TEnum : Enum
         {
             return Enum.GetValues(typeof(TEnum))
                 .Cast<TEnum>()
@@ -82,7 +117,9 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
                 {
                     Value = Convert.ToInt32(e).ToString(),
                     Text = e.ToString()
-                }).ToList();
+                })
+                .ToList();
         }
+
     }
 }

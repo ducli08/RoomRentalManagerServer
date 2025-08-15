@@ -17,7 +17,7 @@ namespace RoomRentalManagerServer.API.Controllers
             _commonAppService = commonAppService;
         }
         [HttpPost("getSelectListItem")]
-        public async Task<List<SelectListItem>> GetSelectListItem(string type, string? cascadeValue)
+        public async Task<ActionResult<List<SelectListItem>>> GetSelectListItem(string type, string? cascadeValue)
         {
             var selectListItemDtos = await _commonAppService.GetCustomSelectListItem(type, cascadeValue);
             var selectListItems = selectListItemDtos.Select(item => new SelectListItem
@@ -25,7 +25,18 @@ namespace RoomRentalManagerServer.API.Controllers
                 Value = item.Value,
                 Text = item.Text
             }).ToList();
-            return selectListItems;
+            return Ok(selectListItems);
+        }
+
+        [HttpPost("getEnumSelectListItem")]
+        public async Task<ActionResult<List<SelectListItemDto>>> GetEnumSelectListItem([FromQuery]string? enumType)
+        {
+            if (string.IsNullOrEmpty(enumType))
+            {
+                return BadRequest("Enum type is null!");
+            }
+            var selectListEnum = _commonAppService.GetEnumSelectListItem(enumType);
+            return Ok(selectListEnum);
         }
     }
 }
