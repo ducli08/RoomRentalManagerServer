@@ -126,11 +126,6 @@ namespace RoomRentalManagerServer.Application.Services
         {
             try
             {
-                if (!_currentUserAppService.IsAuthenticated)
-                {
-                    throw new UnauthorizedAccessException("User is not authenticated.");
-                }
-                var userId = _currentUserAppService.GetUserId ?? throw new InvalidOperationException("User ID is null.");
                 var hasher = new PasswordHasher<Users>();
                 user.Password = hasher.HashPassword(user, user.Password); // Hash the password before saving
                 user.CreatedDate = user.UpdatedDate = DateTime.UtcNow;

@@ -25,7 +25,7 @@ namespace RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto
         public double Area { get; set; }
 
         [Display(Name = "Hình ảnh", Order = 7)]
-        public List<int>? ImagesDescription { get; set; }
+        public List<string>? ImagesDescription { get; set; }
 
         [Display(Name = "Ngày tạo", Order = 8)]
         public DateTime CreatedDate { get; set; }

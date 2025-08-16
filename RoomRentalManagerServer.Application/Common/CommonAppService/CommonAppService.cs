@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
@@ -116,9 +117,23 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
                 .Select(e => new SelectListItemDto
                 {
                     Value = Convert.ToInt32(e).ToString(),
-                    Text = e.ToString()
+                    Text = GetDisplayName(e)
                 })
                 .ToList();
+        }
+
+        private string GetDisplayName<TEnum>(TEnum enumValue) where TEnum : Enum
+        {
+            var memberInfo = typeof(TEnum).GetMember(enumValue.ToString()).FirstOrDefault();
+            if (memberInfo != null)
+            {
+                var displayAttr = memberInfo.GetCustomAttribute<DisplayAttribute>();
+                if (displayAttr != null)
+                {
+                    return displayAttr.Name ?? enumValue.ToString();
+                }
+            }
+            return enumValue.ToString();
         }
 
     }

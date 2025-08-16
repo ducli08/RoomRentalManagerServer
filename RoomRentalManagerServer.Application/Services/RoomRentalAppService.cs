@@ -27,12 +27,12 @@ namespace RoomRentalManagerServer.Application.Services
         }
         public async Task<bool> CreateOrEditRoomRentalAsync(CreateOrEditRoomRentalDto createOrEditRoomRentalDto)
         {
-            var action = createOrEditRoomRentalDto.Id != null ? "Edit" : "Create";
+            var action = createOrEditRoomRentalDto.Id != 0 ? "Edit" : "Create";
             var res = true;
             try
             {
                 var roomRental = _mapper.Map<RoomRental>(createOrEditRoomRentalDto);
-                if (createOrEditRoomRentalDto.Id != null)
+                if (createOrEditRoomRentalDto.Id != 0)
                 {
                     await UpdateRoomRentalAsync(roomRental);
                 }

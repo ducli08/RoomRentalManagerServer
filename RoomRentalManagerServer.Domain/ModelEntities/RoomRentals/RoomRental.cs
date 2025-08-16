@@ -41,7 +41,7 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.RoomRentals
 
         [Column("images")]
         [Display(Name = "Hình ảnh", Order = 7)]
-        public List<int>? ImagesDescription { get; set; }
+        public List<string>? ImagesDescription { get; set; }
 
         [Column("createdDate")]
         [Display(Name = "Ngày tạo", Order = 8)]
