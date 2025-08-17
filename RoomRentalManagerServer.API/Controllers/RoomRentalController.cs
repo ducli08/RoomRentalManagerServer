@@ -21,7 +21,7 @@ namespace RoomRentalManagerServer.API.Controllers
             var roomRentals = await _roomRentalAppService.GetAllRoomRentalAsync(requestDto);
             return Ok(roomRentals);
         }
-        [HttpPost("createOrEditRoomRental")]
+        [HttpPost("createOrEditRoomRental")]    
         public async Task<ActionResult> CreateOrEditRoomRental(CreateOrEditRoomRentalDto input)
         {
             var resCreateOrUpdate = await _roomRentalAppService.CreateOrEditRoomRentalAsync(input);
