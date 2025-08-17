@@ -11,8 +11,8 @@ namespace RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto
         public RoomStatus StatusRoom { get; set; }
         public string Note { get; set; }
         public string Area { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public string CreatorUser { get; set; }
         public string LastUpdateUser { get; set; }
     }
