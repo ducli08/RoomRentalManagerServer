@@ -10,7 +10,8 @@ namespace RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto
         public string PriceEnd { get; set; }
         public RoomStatus StatusRoom { get; set; }
         public string Note { get; set; }
-        public string Area { get; set; }
+        public string AreaStart { get; set; }
+        public string AreaEnd { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public string CreatorUser { get; set; }
