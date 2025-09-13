@@ -1,6 +1,7 @@
 ﻿using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomRentals;
+using Microsoft.AspNetCore.Http;
 
 namespace RoomRentalManagerServer.Application.Interfaces
 {
@@ -11,5 +12,8 @@ namespace RoomRentalManagerServer.Application.Interfaces
         Task<bool> CreateOrEditRoomRentalAsync(CreateOrEditRoomRentalDto input);
         Task DeleteRoomRentalAsync(long id);
         Task<List<RoomRental>> GetAllRoomRentalForSelectListItem();
+
+        // Upload images and return saved relative paths and any errors
+        Task<(List<string> Paths, List<string> Errors)> UploadImageDescriptionAsync(List<IFormFile> uploadImages, string webRoot);
     }
 }

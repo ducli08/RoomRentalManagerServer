@@ -24,4 +24,8 @@
     <ProjectReference Include="..\RoomRentalManagerServer.Application\RoomRentalManagerServer.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\room-images\" />
+  </ItemGroup>
+
 </Project>

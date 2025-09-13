@@ -24,7 +24,7 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoomRentalReposito
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to add room rental: {ex.Message}");
+                _logger.LogError(ex, "Failed to add room rental");
                 throw;
             }
         }
@@ -34,26 +34,31 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoomRentalReposito
             try
             {
                 var roomRental = await _context.RoomRentals.FirstOrDefaultAsync(x => x.Id == id);
-                ArgumentNullException.ThrowIfNull(roomRental);
+                if (roomRental == null)
+                {
+                    throw new KeyNotFoundException($"Room rental with id {id} not found.");
+                }
+
                 _context.RoomRentals.Remove(roomRental);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to delete roomRental: {ex.Message}");
+                _logger.LogError(ex, "Failed to delete room rental with id {Id}", id);
                 throw;
             }
         }
 
-        public async Task<IQueryable<RoomRental>> GetAllRoomRentalAsync()
+        public Task<IQueryable<RoomRental>> GetAllRoomRentalAsync()
         {
             try
             {
-                return _context.RoomRentals.AsQueryable().AsNoTracking();
+                // Return IQueryable for further composition; AsNoTracking for read-only
+                return Task.FromResult(_context.RoomRentals.AsNoTracking().AsQueryable());
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to get all roomrentals: {ex.Message}");
+                _logger.LogError(ex, "Failed to get all room rentals");
                 throw;
             }
         }
@@ -62,11 +67,11 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoomRentalReposito
         {
             try
             {
-                return await _context.RoomRentals.AsQueryable().FirstOrDefaultAsync(x => x.Id.Equals(id));
+                return await _context.RoomRentals.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.LogError($"Failed to get room rental by id: {id}");
+                _logger.LogError(ex, "Failed to get room rental by id {Id}", id);
                 throw;
             }
         }
@@ -76,7 +81,12 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoomRentalReposito
             try
             {
                 var existRoomRental = await _context.RoomRentals.FirstOrDefaultAsync(x => x.Id == roomRental.Id);
-                ArgumentNullException.ThrowIfNull(existRoomRental);
+                if (existRoomRental == null)
+                {
+                    throw new KeyNotFoundException($"Room rental with id {roomRental.Id} not found.");
+                }
+
+                // Update mutable fields only. Preserve CreatedDate/CreatorUser from existing entity.
                 existRoomRental.RoomNumber = roomRental.RoomNumber;
                 existRoomRental.RoomType = roomRental.RoomType;
                 existRoomRental.Price = roomRental.Price;
@@ -84,15 +94,15 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoomRentalReposito
                 existRoomRental.Note = roomRental.Note;
                 existRoomRental.Area = roomRental.Area;
                 existRoomRental.ImagesDescription = roomRental.ImagesDescription;
-                existRoomRental.UpdatedDate = DateTime.Now;
+                existRoomRental.UpdatedDate = DateTime.UtcNow;
                 existRoomRental.LastUpdateUser = roomRental.LastUpdateUser;
-                existRoomRental.CreatedDate = roomRental.CreatedDate;
-                existRoomRental.CreatorUser = roomRental.CreatorUser;
+                // keep existRoomRental.CreatedDate and CreatorUser unchanged
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to update roomrental: {ex.Message}");
+                _logger.LogError(ex, "Failed to update room rental with id {Id}", roomRental.Id);
                 throw;
             }
         }
