@@ -79,5 +79,9 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
         [Column("lastUpdateUser")]
         [Display(Name = "Người cập nhật", Order = 17)]
         public string LastUpdateUser { get; set; }
+
+        [Column("avatar")]
+        [Display(Name = "Ảnh đại diện", Order = 18)]
+        public string Avatar { get; set; }
     }
 }

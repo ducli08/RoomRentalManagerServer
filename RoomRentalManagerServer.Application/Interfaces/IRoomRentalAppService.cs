@@ -10,7 +10,7 @@ namespace RoomRentalManagerServer.Application.Interfaces
         Task<PagedResultDto<RoomRentalDto>> GetAllRoomRentalAsync(PagedRequestDto<RoomRentalFilterDto> pagedRequestDto);
         Task<RoomRentalDto> GetRoomRentalByIdAsync(long id);
         Task<bool> CreateOrEditRoomRentalAsync(CreateOrEditRoomRentalDto input);
-        Task DeleteRoomRentalAsync(long id);
+        Task DeleteRoomRentalAsync(long id, string webRoot);
         Task<List<RoomRental>> GetAllRoomRentalForSelectListItem();
 
         // Upload images and return saved relative paths and any errors

@@ -17,78 +17,27 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IMapper _mapper;
         private readonly IRoomRentalRepository _roomRentalRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
-        public RoomRentalAppService(ILogger<RoomRentalAppService> logger, IRoomRentalRepository roomRentalRepository, IMapper mapper, ICurrentUserAppService currentUserAppService)
+        private readonly ILocalFileStorageAppService _fileStorageService;
+        public RoomRentalAppService(ILogger<RoomRentalAppService> logger, IRoomRentalRepository roomRentalRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService fileStorageService)
         {
             _logger = logger;
             _mapper = mapper;
             _roomRentalRepository = roomRentalRepository;
             _currentUserAppService = currentUserAppService;
+            _fileStorageService = fileStorageService;
         }
 
         public async Task<(List<string> Paths, List<string> Errors)> UploadImageDescriptionAsync(List<IFormFile> uploadImages, string webRoot)
         {
-            var errors = new List<string>();
-
             if (!_currentUserAppService.IsAuthenticated)
             {
                 _logger.LogWarning("Unauthenticated user attempted to upload images");
-                errors.Add("User is not authenticated.");
-                return (new List<string>(), errors);
+                return (new List<string>(), new List<string> { "User is not authenticated." });
             }
 
-            var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-                ".jpg", ".jpeg", ".png", ".gif" };
-            const long maxFileSize = 5 * 1024 * 1024; // 5 MB
-
-            var savedPaths = new List<string>();
-
-            var uploadsRootFolder = Path.Combine(webRoot ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "room-images");
-            if (!Directory.Exists(uploadsRootFolder))
-                Directory.CreateDirectory(uploadsRootFolder);
-
-            foreach (var file in uploadImages)
-            {
-                if (file == null)
-                    continue;
-
-                if (file.Length == 0)
-                {
-                    errors.Add($"File {file?.FileName} is empty.");
-                    continue;
-                }
-
-                if (file.Length > maxFileSize)
-                {
-                    errors.Add($"File {file.FileName} exceeds the allowed size of {maxFileSize} bytes.");
-                    continue;
-                }
-
-                var ext = Path.GetExtension(file.FileName);
-                if (string.IsNullOrEmpty(ext) || !allowedExtensions.Contains(ext))
-                {
-                    errors.Add($"File {file.FileName} has an invalid extension.");
-                    continue;
-                }
-
-                var uniqueFileName = $"{Guid.NewGuid()}{ext}";
-                var filePath = Path.Combine(uploadsRootFolder, uniqueFileName);
-
-                try
-                {
-                    await using var stream = new FileStream(filePath, FileMode.Create);
-                    await file.CopyToAsync(stream);
-
-                    var relativePath = $"/uploads/room-images/{uniqueFileName}";
-                    savedPaths.Add(relativePath);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to save uploaded image {FileName}", file.FileName);
-                    errors.Add($"Failed to save {file.FileName}: {ex.Message}");
-                }
-            }
-
-            return (savedPaths, errors);
+            // delegate to file storage service; relative folder without leading slash
+            var (paths, errors) = await _fileStorageService.UploadFilesAsync(uploadImages, "uploads/room-images", webRoot);
+            return (paths, errors);
         }
 
         public async Task<bool> CreateOrEditRoomRentalAsync(CreateOrEditRoomRentalDto createOrEditRoomRentalDto)
@@ -140,7 +89,7 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
-        public async Task DeleteRoomRentalAsync(long id)
+        public async Task DeleteRoomRentalAsync(long id, string webRoot)
         {
             try
             {
@@ -154,7 +103,6 @@ namespace RoomRentalManagerServer.Application.Services
                 // Delete image files from disk if present. Don't fail delete if file deletion fails.
                 try
                 {
-                    var webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                     if (roomRental.ImagesDescription != null && roomRental.ImagesDescription.Any())
                     {
                         foreach (var imgPath in roomRental.ImagesDescription)
@@ -162,25 +110,14 @@ namespace RoomRentalManagerServer.Application.Services
                             if (string.IsNullOrWhiteSpace(imgPath))
                                 continue;
 
-                            var relative = imgPath.TrimStart('~').TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-                            var fullPath = Path.Combine(webRoot, relative);
-
                             try
                             {
-                                if (File.Exists(fullPath))
-                                {
-                                    File.Delete(fullPath);
-                                    _logger.LogInformation("Deleted image file {FilePath} for room rental {Id}", fullPath, id);
-                                }
-                                else
-                                {
-                                    _logger.LogWarning("Image file not found when deleting room rental {Id}: {FilePath}", id, fullPath);
-                                }
+                                await _fileStorageService.DeleteFileAsync(imgPath, webRoot);
+                                _logger.LogInformation("Deleted image file {FilePath} for room rental {Id}", imgPath, id);
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogWarning(ex, "Failed to delete image file {FilePath} for room rental {Id}", fullPath, id);
-                                // continue with other files
+                                _logger.LogWarning(ex, "Failed to delete image file {FilePath} for room rental {Id}", imgPath, id);
                             }
                         }
                     }

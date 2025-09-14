@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto;
@@ -90,8 +89,8 @@ namespace RoomRentalManagerServer.API.Controllers
             var existing = await _roomRentalAppService.GetRoomRentalByIdAsync(id);
             if (existing == null)
                 return NotFound(new { message = "Room rental not found." });
-
-            await _roomRentalAppService.DeleteRoomRentalAsync(id);
+            var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            await _roomRentalAppService.DeleteRoomRentalAsync(id, webRoot);
             return NoContent();
         }
     }
