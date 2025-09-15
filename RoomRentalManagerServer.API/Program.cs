@@ -105,6 +105,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.Use(async (context, next) =>
+{
+    var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(authHeader))
+    {
+        Console.WriteLine($"Authorization Header: {authHeader}");
+    }
+    else
+    {
+        Console.WriteLine("Authorization Header not found!");
+    }
+
+    await next();
+});
 app.UseCors(AllowSpecificOrigins);
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,13 +17,29 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
-        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService)
+        private readonly ILocalFileStorageAppService _localFileStorageAppService;
+        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService)
         {
             _logger = logger;
             _mapper = mapper;
             _userRepository = userRepository;
             _currentUserAppService = currentUserAppService;
+            _localFileStorageAppService = localFileStorageAppService;
         }
+
+        public async Task<(List<string> Paths, List<string> Errors)> UploadAvatarAsync(List<IFormFile> avatar, string webRoot)
+        {
+            if (!_currentUserAppService.IsAuthenticated)
+            {
+                _logger.LogWarning("Unauthenticated user attempted to upload images");
+                return (new List<string>(), new List<string> { "User is not authenticated." });
+            }
+
+            // delegate to file storage service; relative folder without leading slash
+            var (paths, errors) = await _localFileStorageAppService.UploadFilesAsync(avatar, "uploads/avatar-images", webRoot);
+            return (paths, errors);
+        }
+
         public async Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input)
         {
             var action = input.Id != null ? "Edit" : "Create";

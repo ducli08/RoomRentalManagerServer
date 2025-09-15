@@ -12,15 +12,17 @@ namespace RoomRentalManagerServer.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        public readonly IUserAppService _userAppService;
-        public readonly IProvinceAppService _provinceAppService;
-        public readonly IDistrictAppService _districtAppService;
-        public readonly IWardAppService _wardAppService;
-        public readonly IRedisCacheService _redisCacheService;
-        public readonly IRoleGroupAppService _roleGroupAppService;
-        public readonly ILogger<UserController> _logger;
+        private readonly IUserAppService _userAppService;
+        private readonly IProvinceAppService _provinceAppService;
+        private readonly IDistrictAppService _districtAppService;
+        private readonly IWardAppService _wardAppService;
+        private readonly IRedisCacheService _redisCacheService;
+        private readonly IRoleGroupAppService _roleGroupAppService;
+        private readonly ILogger<UserController> _logger;
+        private readonly IWebHostEnvironment _env;
         public UserController(IUserAppService userAppService, IProvinceAppService provinceAppService, IDistrictAppService districtAppService,
-            IWardAppService wardAppService, IRedisCacheService redisCacheService, ILogger<UserController> logger, IRoleGroupAppService roleGroupAppService)
+            IWardAppService wardAppService, IRedisCacheService redisCacheService, ILogger<UserController> logger, IRoleGroupAppService roleGroupAppService,
+            IWebHostEnvironment env)
         {
             _userAppService = userAppService;
             _provinceAppService = provinceAppService;
@@ -29,6 +31,7 @@ namespace RoomRentalManagerServer.API.Controllers
             _redisCacheService = redisCacheService;
             _roleGroupAppService = roleGroupAppService;
             _logger = logger;
+            _env = env;
         }
         [HttpPost("createOrEditUser")]
         public async Task<ActionResult> CreateOrEditUser(CreateOrEditUserDto input)
@@ -114,6 +117,26 @@ namespace RoomRentalManagerServer.API.Controllers
         public async Task DeleteUser(long id)
         {
             await _userAppService.DeleteUserAsync(id);
+        }
+
+        [HttpPost("uploadAvatar")]
+        public async Task<IActionResult> UploadAvatar([FromForm] List<IFormFile> avatar)
+        {
+            if (avatar == null)
+                return BadRequest(new { message = "No files received." });
+
+            var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var (paths, errors) = await _userAppService.UploadAvatarAsync(avatar, webRoot);
+
+            if (errors != null && errors.Any())
+            {
+                if (errors.Contains("User is not authenticated."))
+                    return Unauthorized(new { errors });
+
+                return BadRequest(new { paths, errors });
+            }
+
+            return Ok(new { paths });
         }
     }
 }

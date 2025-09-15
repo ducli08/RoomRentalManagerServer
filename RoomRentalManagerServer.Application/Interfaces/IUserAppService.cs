@@ -1,4 +1,5 @@
-﻿using RoomRentalManagerServer.Application.Common.CommonDto;
+﻿using Microsoft.AspNetCore.Http;
+using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
 using System;
@@ -11,6 +12,7 @@ namespace RoomRentalManagerServer.Application.Interfaces
 {
     public interface IUserAppService
     {
+        Task<(List<string> Paths, List<string> Errors)> UploadAvatarAsync(List<IFormFile> avatar, string webRoot);
         Task<PagedResultDto<UserDto>> GetAllUsersAsync(PagedRequestDto<UserFilterDto> pagedRequestDto);
         Task<UserDto> GetUserByIdAsync(long id);
         Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input);
