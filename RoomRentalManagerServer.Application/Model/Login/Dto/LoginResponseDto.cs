@@ -11,6 +11,16 @@ namespace RoomRentalManagerServer.Application.Model.Login.Dto
     {
         public string Message { get; set; }
         public string AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
         public UserDto User { get; set; }
+
+        // UTC expiry timestamp for access token
+        public DateTime ExpiresAt { get; set; }
+        // Number of seconds until access token expires
+        public int ExpiresIn { get; set; }
+
+        // Optional: refresh token expiry info (present only when refresh token issued)
+        public DateTime? RefreshExpiresAt { get; set; }
+        public int? RefreshExpiresIn { get; set; }
     }
 }

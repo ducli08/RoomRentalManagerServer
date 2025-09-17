@@ -122,6 +122,7 @@ namespace RoomRentalManagerServer.API.Controllers
         [HttpPost("uploadAvatar")]
         public async Task<IActionResult> UploadAvatar([FromForm] List<IFormFile> avatar)
         {
+            var boolean = HttpContext.User?.Identity?.IsAuthenticated;
             if (avatar == null)
                 return BadRequest(new { message = "No files received." });
 

@@ -9,5 +9,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
     public interface IJwtTokenAppService
     {
         string GenerateToken(long userId, string userName, DateTime expiresTime);
+        string GenerateRefreshToken();
     }
 }

@@ -83,21 +83,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var jwtSettings = builder.Configuration.GetSection("Jwt");
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false; // dev only
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"])
-            )
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? string.Empty))
         };
-    });
-var app = builder.Build();
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var auth = ctx.Request.Headers["Authorization"].FirstOrDefault();
+                Console.WriteLine($"Jwt OnMessageReceived: {ctx.Request.Method} {ctx.Request.Path} - Header: {auth ?? "null"}");
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"Jwt OnAuthenticationFailed: {ctx.Exception?.GetType().Name} - {ctx.Exception?.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                Console.WriteLine($"Jwt OnTokenValidated: {ctx.Principal?.Identity?.Name}; Authenticated={ctx.Principal?.Identity?.IsAuthenticated}");
+                return Task.CompletedTask;
+            }
+        };
+    });var app = builder.Build();
 app.UseStaticFiles();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -105,6 +124,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors(AllowSpecificOrigins);
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.Use(async (context, next) =>
 {
     var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
@@ -119,9 +141,11 @@ app.Use(async (context, next) =>
 
     await next();
 });
-app.UseCors(AllowSpecificOrigins);
-app.UseHttpsRedirection();
-app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"After UseAuthentication - {context.Request.Method} {context.Request.Path} - IsAuthenticated: {context.User?.Identity?.IsAuthenticated}, Name: {context.User?.Identity?.Name}");
+    await next();
+});
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

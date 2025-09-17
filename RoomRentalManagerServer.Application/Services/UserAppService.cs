@@ -47,7 +47,7 @@ namespace RoomRentalManagerServer.Application.Services
             try
             {
                 var user = _mapper.Map<Users>(input);
-                if (input.Id != null)
+                if (input.Id != null && input.Id != 0)
                 {
                     await UpdateAsync(user);
                 }
