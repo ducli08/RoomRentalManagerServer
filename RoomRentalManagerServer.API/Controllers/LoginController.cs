@@ -115,6 +115,14 @@ namespace RoomRentalManagerServer.API.Controllers
             return Ok(response);
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] long userId)
+        {
+            var key = $"refresh_{userId}";
+            await _redisCacheService.RemoveAsync(key);
+            return NoContent();
+        }
+
         // wrapper helper to set cached user as list<UserDto> to match existing Redis API
         private async Task _redisCache_service_SetUserAsync(string key, UserDto user, TimeSpan? expiry)
         {

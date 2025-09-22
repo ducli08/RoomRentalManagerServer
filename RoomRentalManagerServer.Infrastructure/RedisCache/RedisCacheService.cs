@@ -48,5 +48,14 @@ namespace RoomRentalManagerServer.Infrastructure.RedisCache
             }
             
         }
+
+        public async Task RemoveAsync(string key)
+        {
+            Stopwatch st = new Stopwatch();
+            st.Start();
+            await _database.KeyDeleteAsync(key);
+            st.Stop();
+            _logger.LogInformation($"Time to remove cache from RedisCacheService: {st.ElapsedMilliseconds} ms");
+        }
     }
 }
