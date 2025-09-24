@@ -1,4 +1,5 @@
-﻿using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
+﻿using RoomRentalManagerServer.Application.Common.CommonDto;
+using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace RoomRentalManagerServer.Application.Interfaces
 {
     public interface IRoleGroupAppService
     {
-        Task<List<RoleGroup>> GetAllRoleGroupAsync();
+        Task<PagedResultDto<RoleGroupDto>> GetAllRoleGroupsAsync(PagedRequestDto<RoleGroupFilterDto> pagedRequestRoleGroupDto);
         Task<RoleGroup> GetRoleGroupByIdAsync(long id);
         Task<bool> CreateOrEditRoleGroup(CreateOrEditRoleGroupDto input);
         Task<bool> UpdateAsync(RoleGroup roleGroup);

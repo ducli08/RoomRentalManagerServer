@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
+using RoomRentalManagerServer.Application.Model.RoomRentalsModel.Dto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
@@ -28,16 +30,54 @@ namespace RoomRentalManagerServer.Application.Services
             _roleGroupRepository = roleGroupRepository;
         }
 
-        public async Task<List<RoleGroup>> GetAllRoleGroupAsync()
+        public async Task<PagedResultDto<RoleGroupDto>> GetAllRoleGroupsAsync(PagedRequestDto<RoleGroupFilterDto> pagedRequestRoleGroupDto)
         {
             try
             {
-                var roleGroupQuery = await _roleGroupRepository.GetAllQueryAsync();
-                return await roleGroupQuery.ToListAsync();
-            }
-            catch (Exception)
-            {
+                var queryGetAllRoleGroup = await _roleGroupRepository.GetAllRoleGroupAsync();
 
+                // Filter by CreatedDate
+                if (pagedRequestRoleGroupDto.Filter?.CreatedAt.HasValue == true)
+                {
+                    var filterDate = pagedRequestRoleGroupDto.Filter.CreatedAt.Value.Date;
+                    queryGetAllRoleGroup = queryGetAllRoleGroup.Where(x => x.CreatedAt.Date == filterDate);
+                }
+
+                // Filter by UpdatedDate
+                if (pagedRequestRoleGroupDto.Filter?.UpdatedAt.HasValue == true)
+                {
+                    var filterDate = pagedRequestRoleGroupDto.Filter.UpdatedAt.Value.Date;
+                    queryGetAllRoleGroup = queryGetAllRoleGroup.Where(x => x.UpdatedAt.Date == filterDate);
+                }
+
+                // Filter by CreatorUser (contains search)
+                if (!string.IsNullOrEmpty(pagedRequestRoleGroupDto.Filter?.CreatorUser))
+                {
+                    queryGetAllRoleGroup = queryGetAllRoleGroup.Where(x => x.CreatorUser != null && x.CreatorUser.Contains(pagedRequestRoleGroupDto.Filter.CreatorUser));
+                }
+
+                // Filter by LastUpdateUser (contains search)
+                if (!string.IsNullOrEmpty(pagedRequestRoleGroupDto.Filter?.LastUpdateUser))
+                {
+                    queryGetAllRoleGroup = queryGetAllRoleGroup.Where(x => x.LastUpdateUser != null && x.LastUpdateUser.Contains(pagedRequestRoleGroupDto.Filter.LastUpdateUser));
+                }
+
+                // Apply sorting
+                if (!string.IsNullOrEmpty(pagedRequestRoleGroupDto.SortOrder) && !string.IsNullOrEmpty(pagedRequestRoleGroupDto.SortBy))
+                {
+                    queryGetAllRoleGroup = pagedRequestRoleGroupDto.SortOrder == "desc"
+                    ? queryGetAllRoleGroup.OrderByDescending(x => EF.Property<object>(x, pagedRequestRoleGroupDto.SortBy))
+                    : queryGetAllRoleGroup.OrderBy(x => EF.Property<object>(x, pagedRequestRoleGroupDto.SortBy));
+                }
+
+                var total = await queryGetAllRoleGroup.CountAsync();
+                var roleGroups = await queryGetAllRoleGroup.Skip((pagedRequestRoleGroupDto.Page - 1) * pagedRequestRoleGroupDto.PageSize).Take(pagedRequestRoleGroupDto.PageSize).ToListAsync();
+                var roleGroupDtos = roleGroups.Select(r => _mapper.Map<RoleGroupDto>(r)).ToList();
+                return new PagedResultDto<RoleGroupDto>(roleGroupDtos, total);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to get all RoleGroups");
                 throw;
             }
         }

@@ -13,6 +13,6 @@ namespace RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces
         Task<bool> DeleteAsync(long id);
         Task<RoleGroup> GetByIdAsync(long id);
         Task<bool> UpdateAsync(RoleGroup roleGroup);
-        Task<IQueryable<RoleGroup>> GetAllQueryAsync();
+        Task<IQueryable<RoleGroup>> GetAllRoleGroupAsync();
     }
 }

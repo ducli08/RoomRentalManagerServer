@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
 using RoomRentalManagerServer.Domain.Interfaces.RoleInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
+using RoomRentalManagerServer.Domain.ModelEntities.RoomRentals;
 using RoomRentalManagerServer.Infrastructure.Data;
 using RoomRentalManagerServer.Infrastructure.Repositories.RoleRepositories;
 using System;
@@ -53,15 +54,15 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoleGroupRepositor
             }
         }
 
-        public async Task<IQueryable<RoleGroup>> GetAllQueryAsync()
+        public Task<IQueryable<RoleGroup>> GetAllRoleGroupAsync()
         {
             try
             {
-                return _context.RoleGroup.AsQueryable().AsNoTracking();
+                return Task.FromResult(_context.RoleGroup.AsNoTracking().AsQueryable());
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to get all roleGroup: {ex.Message}");
+                _logger.LogError(ex, "Failed to get all room rentals");
                 throw;
             }
         }

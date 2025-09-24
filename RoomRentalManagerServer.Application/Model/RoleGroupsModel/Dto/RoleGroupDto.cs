@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto
 {
@@ -24,7 +18,5 @@ namespace RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto
         public string LastUpdateUser { get; set; }
         [Display(Name = "Mô tả", Order = 7)]
         public string Descriptions { get; set; }
-        [Display(Name = "Danh sách quyền", Order = 8)]
-        public List<int> RoleIds { get; set; }
     }
 }
