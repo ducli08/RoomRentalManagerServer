@@ -1,16 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
-using RoomRentalManagerServer.Domain.Interfaces.RoleInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
-using RoomRentalManagerServer.Domain.ModelEntities.RoomRentals;
 using RoomRentalManagerServer.Infrastructure.Data;
-using RoomRentalManagerServer.Infrastructure.Repositories.RoleRepositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RoomRentalManagerServer.Infrastructure.Repositories.RoleGroupRepositories
 {
@@ -23,33 +15,36 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoleGroupRepositor
             _context = context;
             _logger = logger;
         }
-        public async Task<RoleGroup> AddAsync(RoleGroup roleGroup)
+        public async Task AddAsync(RoleGroup roleGroup)
         {
             try
             {
                 await _context.RoleGroup.AddAsync(roleGroup);
                 await _context.SaveChangesAsync();
-                return roleGroup;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to add roleGroup: {ex.Message}");
+                _logger.LogError(ex, "Failed to add rooleGroup");
                 throw;
             }
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        public async Task DeleteAsync(long id)
         {
             try
             {
                 var roleGroup = await _context.RoleGroup.FirstOrDefaultAsync(x => x.Id == id);
-                if (roleGroup == null) return false;
+                if (roleGroup == null)
+                {
+                    throw new KeyNotFoundException($"Role group with id {id} not found.");
+                }
+
                 _context.RoleGroup.Remove(roleGroup);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to delete roleGroup: {ex.Message}");
+                _logger.LogError(ex, "Failed to delete room rental with id {Id}", id);
                 throw;
             }
         }
@@ -67,7 +62,7 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoleGroupRepositor
             }
         }
 
-        public async Task<RoleGroup?> GetByIdAsync(long id)
+        public async Task<RoleGroup?> GetRoleGroupById(long id)
         {
             try
             {
@@ -75,27 +70,35 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoleGroupRepositor
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to get roleGroup by id: {ex.Message}");
+                _logger.LogError(ex, "Failed to get role group by id {Id}", id);
                 throw;
             }
-
         }
 
-        public async Task<bool> UpdateAsync(RoleGroup roleGroup)
+        public async Task UpdateAsync(RoleGroup roleGroup)
         {
             try
             {
-                var data = _context.RoleGroup.FirstOrDefault(x => x.Id == roleGroup.Id);
-                if (data == null) return false;
-                _context.RoleGroup.Update(roleGroup);
-                return await _context.SaveChangesAsync() > 0;
+                var existRoleGroup= await _context.RoleGroup.FirstOrDefaultAsync(x => x.Id == roleGroup.Id);
+                if (existRoleGroup == null)
+                {
+                    throw new KeyNotFoundException($"Room rental with id {roleGroup.Id} not found.");
+                }
+
+                // Update mutable fields only. Preserve CreatedDate/CreatorUser from existing entity.
+                existRoleGroup.Name = roleGroup.Name;
+                existRoleGroup.Active = roleGroup.Active;
+                existRoleGroup.UpdatedAt = DateTime.UtcNow;
+                existRoleGroup.LastUpdateUser = roleGroup.LastUpdateUser;
+                // keep existRoomRental.CreatedDate and CreatorUser unchanged
+
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to update roleGroup: {ex.Message}");
+                _logger.LogError(ex, "Failed to update role group with id {Id}", roleGroup.Id);
                 throw;
             }
-
         }
     }
 }

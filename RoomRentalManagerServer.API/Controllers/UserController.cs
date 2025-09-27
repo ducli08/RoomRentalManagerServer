@@ -101,18 +101,6 @@ namespace RoomRentalManagerServer.API.Controllers
             return selectList;
         }
 
-        [HttpPost("getAllRoleGroup")]
-        public async Task<List<SelectListItem>> GetAllRoleGroupAsync()
-        {
-            var roleGroupQuery = await _roleGroupAppService.GetAllRoleGroupAsync();
-            var selectList = roleGroupQuery.Select(x => new SelectListItem
-            {
-                Value = x.Id.ToString(),
-                Text = x.Name
-            }).ToList();
-            return selectList;
-        }
-
         [HttpDelete("deleteUser")]
         public async Task DeleteUser(long id)
         {
