@@ -53,7 +53,7 @@ namespace RoomRentalManagerServer.API.Controllers
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> DeleteRoomRental(long id)
+        public async Task<IActionResult> DeleteRoleGroup(long id)
         {
             var existing = await _roleGroupAppService.GetRoleGroupByIdAsync(id);
             if (existing == null)
