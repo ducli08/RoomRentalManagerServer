@@ -32,7 +32,7 @@ public class RoomRentalManagerServerDbContext : DbContext
     public DbSet<Ward> Ward { get; set; }
     public DbSet<RoleGroup> RoleGroup { get; set; }
     public DbSet<Role> Role { get; set; }
-    public DbSet<RoleGroupPermission> RoleGroupPermission { get; set; }
+    public DbSet<RoleGroupRole> RoleGroupRole { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

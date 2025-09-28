@@ -11,11 +11,13 @@ namespace RoomRentalManagerServer.API.Controllers
     {
         private readonly IRoleGroupAppService _roleGroupAppService;
         private readonly ILogger<RoleGroupController> _logger;
+        private readonly IRoleAppService _roleAppService;
 
-        public RoleGroupController(IRoleGroupAppService roleGroupAppService, ILogger<RoleGroupController> logger)
+        public RoleGroupController(IRoleGroupAppService roleGroupAppService, ILogger<RoleGroupController> logger, IRoleAppService roleAppService)
         {
             _roleGroupAppService = roleGroupAppService;
             _logger = logger;
+            _roleAppService = roleAppService;
         }
 
         [HttpPost("getAllRoleGroupsAsync")]
@@ -61,5 +63,21 @@ namespace RoomRentalManagerServer.API.Controllers
             await _roleGroupAppService.DeleteRoleGroupAsync(id);
             return NoContent();
         }
+
+        [HttpGet("getAllRole")]
+        public async Task<IActionResult> GetAllRole()
+        {
+            try
+            {
+                var roles = await _roleAppService.GetAllRoleAsync();
+                return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving roles.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while retrieving roles." });
+            }
+        }
+
     }
 }

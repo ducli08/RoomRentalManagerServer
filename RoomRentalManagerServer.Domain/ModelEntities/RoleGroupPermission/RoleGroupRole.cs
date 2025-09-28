@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission
 {
-    [Table("roleGroupPermission")]
-    public class RoleGroupPermission
+    [Table("roleGroupRole")]
+    public class RoleGroupRole
     {
         [Key]
         [Column("id")]

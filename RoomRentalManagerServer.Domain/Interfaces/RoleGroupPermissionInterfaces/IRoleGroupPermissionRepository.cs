@@ -4,11 +4,11 @@ namespace RoomRentalManagerServer.Domain.Interfaces.RoleGroupPermissionInterface
 {
     public interface IRoleGroupPermissionRepository
     {
-        Task<RoleGroupPermission> AddAsync(RoleGroupPermission entity);
+        Task<RoleGroupRole> AddAsync(RoleGroupRole entity);
         Task<bool> DeleteAsync(long id);
-        Task<RoleGroupPermission> GetByIdAsync(long id);
-        Task<bool> UpdateAsync(RoleGroupPermission entity);
-        Task<IQueryable<RoleGroupPermission>> GetAllQueryAsync();
-        Task<IQueryable<RoleGroupPermission>> GetByRoleGroupIdAsync(long roleGroupId);
+        Task<RoleGroupRole> GetByIdAsync(long id);
+        Task<bool> UpdateAsync(RoleGroupRole entity);
+        Task<IQueryable<RoleGroupRole>> GetAllQueryAsync();
+        Task<IQueryable<RoleGroupRole>> GetByRoleGroupIdAsync(long roleGroupId);
     }
 }

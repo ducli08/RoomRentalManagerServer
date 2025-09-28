@@ -1,13 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Interfaces;
-using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
+using RoomRentalManagerServer.Application.Model.Roles.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.RoleInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -21,6 +16,20 @@ namespace RoomRentalManagerServer.Application.Services
             _logger = logger;
             _mapper = mapper;
             _roleRepository = roleRepository;
+        }
+
+        public async Task<List<RoleDto>> GetAllRoleAsync()
+        {
+            try
+            {
+                var roles = await _roleRepository.GetAllQueryAsync();
+                return _mapper.Map<List<RoleDto>>(roles.ToList());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get all roles: {ex.Message}");
+                throw;
+            }
         }
     }
 }

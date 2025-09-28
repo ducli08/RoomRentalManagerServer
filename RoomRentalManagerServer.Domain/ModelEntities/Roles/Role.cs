@@ -11,7 +11,7 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.Roles
         public long Id { get; set; }
 
         [Column("name")]
-        [Display(Name = "Tên quyền", Order = 1)]
+        [Display(Name = "Tên vai trò", Order = 1)]
         public string Name { get; set; }
 
         [Column("active")]

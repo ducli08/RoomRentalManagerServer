@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RoomRentalManagerServer.Application.Model.Roles.Dto;
 
 namespace RoomRentalManagerServer.Application.Interfaces
 {
-    public class IRoleAppService
+    public interface IRoleAppService
     {
+        Task<List<RoleDto>> GetAllRoleAsync();
     }
 }
