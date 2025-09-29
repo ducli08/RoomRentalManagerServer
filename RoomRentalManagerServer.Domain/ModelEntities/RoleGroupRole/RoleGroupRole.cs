@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission
+namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole
 {
     [Table("roleGroupRole")]
     public class RoleGroupRole

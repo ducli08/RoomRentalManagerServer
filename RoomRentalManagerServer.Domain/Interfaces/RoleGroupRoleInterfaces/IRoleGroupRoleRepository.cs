@@ -1,12 +1,12 @@
-using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission;
+using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole;
 
-namespace RoomRentalManagerServer.Domain.Interfaces.RoleGroupPermissionInterfaces
+namespace RoomRentalManagerServer.Domain.Interfaces.RoleGroupRoleInterfaces
 {
-    public interface IRoleGroupPermissionRepository
+    public interface IRoleGroupRoleRepository
     {
         Task<RoleGroupRole> AddAsync(RoleGroupRole entity);
         Task<bool> DeleteAsync(long id);
-        Task<RoleGroupRole> GetByIdAsync(long id);
+        Task<IQueryable<RoleGroupRole>> GetByIdAsync(long id);
         Task<bool> UpdateAsync(RoleGroupRole entity);
         Task<IQueryable<RoleGroupRole>> GetAllQueryAsync();
         Task<IQueryable<RoleGroupRole>> GetByRoleGroupIdAsync(long roleGroupId);

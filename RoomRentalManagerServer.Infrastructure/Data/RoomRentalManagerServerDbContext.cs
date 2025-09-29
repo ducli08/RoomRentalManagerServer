@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RoomRentalManagerServer.Domain.ModelEntities;
 using RoomRentalManagerServer.Domain.ModelEntities.Contracts;
 using RoomRentalManagerServer.Domain.ModelEntities.Districts;
 using RoomRentalManagerServer.Domain.ModelEntities.Equipments;
@@ -6,7 +7,7 @@ using RoomRentalManagerServer.Domain.ModelEntities.ImageDescriptions;
 using RoomRentalManagerServer.Domain.ModelEntities.Invoices;
 using RoomRentalManagerServer.Domain.ModelEntities.PaymentAmount;
 using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
-using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission;
+using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
 using RoomRentalManagerServer.Domain.ModelEntities.Roles;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomEquipments;
@@ -33,6 +34,8 @@ public class RoomRentalManagerServerDbContext : DbContext
     public DbSet<RoleGroup> RoleGroup { get; set; }
     public DbSet<Role> Role { get; set; }
     public DbSet<RoleGroupRole> RoleGroupRole { get; set; }
+    public DbSet<Permission> Permission { get; set; }
+    public DbSet<RolePermission> RolePermission { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
