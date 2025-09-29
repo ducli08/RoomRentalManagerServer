@@ -65,7 +65,7 @@ namespace RoomRentalManagerServer.API.Controllers
         }
 
         [HttpGet("getAllRole")]
-        public async Task<IActionResult> GetAllRole()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -78,6 +78,6 @@ namespace RoomRentalManagerServer.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while retrieving roles." });
             }
         }
-
+        
     }
 }
