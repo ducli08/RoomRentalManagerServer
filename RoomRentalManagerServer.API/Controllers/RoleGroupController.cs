@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
+using RoomRentalManagerServer.Application.Model.Roles.Dto;
 
 namespace RoomRentalManagerServer.API.Controllers
 {
@@ -65,7 +66,7 @@ namespace RoomRentalManagerServer.API.Controllers
         }
 
         [HttpGet("getAllRole")]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<List<RoleDto>>> GetAll()
         {
             try
             {

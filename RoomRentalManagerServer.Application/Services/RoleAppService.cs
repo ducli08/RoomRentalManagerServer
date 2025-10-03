@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.PermissionModel.Dto;
@@ -30,22 +31,17 @@ namespace RoomRentalManagerServer.Application.Services
             try
             {
                 var query = await _roleRepository.GetAllQueryAsync();
+                var roles = await query.ToListAsync(); 
                 var roleIds = query.Select(r => r.Id).ToList();
                 var rolePermissions = await _rolePermissionRepository.GetAllRolePermissionByListRoleIdAsync(roleIds);
                 var permissionIds = rolePermissions.Select(x => x.PermissionId).Distinct().ToList();
                 var permissions = await _permissionRepository.GetAllPermissionByListIdAsync(permissionIds);
+                var permisstionDto = permissions.Select(p => new PermissionDto { Id = p.Id, Name = p.Name }).ToList();
                 var result = query.Select(r => new RoleDto
                 {
                     Id = r.Id,
                     Name = r.Name,
-                    Permissions = rolePermissions
-                        .Where(rp => rp.RoleId == r.Id)
-                        .Select(rp => permissions.First(p => p.Id == rp.PermissionId))
-                        .Select(p => new PermissionDto
-                        {
-                            Id = p.Id,
-                            Name = p.Name
-                        }).ToList()
+                    Permissions = permisstionDto
                 });
                 return _mapper.Map<List<RoleDto>>(result);
             }
