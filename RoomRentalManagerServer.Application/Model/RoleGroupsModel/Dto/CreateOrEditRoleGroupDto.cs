@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RoomRentalManagerServer.Application.Model.Roles.Dto;
 
 namespace RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto
 {
@@ -14,6 +15,6 @@ namespace RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto
         public string Name { get; set; }
         public bool Active { get; set; }
         public string Descriptions { get; set; }
-        public List<int> RoleIds { get; set; }
+        public List<RoleDto> RoleDtos { get; set; }
     }
 }

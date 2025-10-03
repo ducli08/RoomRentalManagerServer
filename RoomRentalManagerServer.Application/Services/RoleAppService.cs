@@ -36,14 +36,20 @@ namespace RoomRentalManagerServer.Application.Services
                 var rolePermissions = await _rolePermissionRepository.GetAllRolePermissionByListRoleIdAsync(roleIds);
                 var permissionIds = rolePermissions.Select(x => x.PermissionId).Distinct().ToList();
                 var permissions = await _permissionRepository.GetAllPermissionByListIdAsync(permissionIds);
-                var permisstionDto = permissions.Select(p => new PermissionDto { Id = p.Id, Name = p.Name }).ToList();
-                var result = query.Select(r => new RoleDto
+                var roleDtos = new List<RoleDto>();
+                foreach (var role in roles )
                 {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Permissions = permisstionDto
-                });
-                return _mapper.Map<List<RoleDto>>(result);
+                    var roleDto = new RoleDto();
+                    roleDto.Id = role.Id;
+                    roleDto.Name = role.Name;
+                    var rolePermissionForRole = rolePermissions.Where(x => x.RoleId == role.Id).ToList();
+                    var permissionIdForRole = rolePermissionForRole.Select(x => x.PermissionId).ToList();
+                    var permissionsForRole = permissions.Where(x => permissionIdForRole.Contains(x.Id))
+                        .Select(x => new PermissionDto{Id = x.Id, Name = x.Name}).ToList();
+                    roleDto.Permissions = permissionsForRole;
+                    roleDtos.Add(roleDto);
+                }
+                return _mapper.Map<List<RoleDto>>(roleDtos);
             }
             catch (Exception ex)
             {
