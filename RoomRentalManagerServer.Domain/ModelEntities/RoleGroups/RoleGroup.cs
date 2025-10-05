@@ -37,8 +37,5 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroups
         [Column("descriptions")]
         [Display(Name = "Mô tả", Order = 7)]
         public string Descriptions { get; set; }
-
-        [Column("roleId")]
-        public List<int> RoleIds { get; set; }
     }
 }

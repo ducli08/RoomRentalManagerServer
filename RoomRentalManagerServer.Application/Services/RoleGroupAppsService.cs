@@ -5,6 +5,8 @@ using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
+using RoomRentalManagerServer.Domain.Interfaces.RoleGroupRoleInterfaces;
+using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
 
 namespace RoomRentalManagerServer.Application.Services
@@ -15,12 +17,15 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IMapper _mapper;
         private readonly IRoleGroupRepository _roleGroupRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
-        public RoleGroupAppsService(ILogger<RoleGroupAppsService> logger, IRoleGroupRepository roleGroupRepository, IMapper mapper, ICurrentUserAppService currentUserAppService)
+        private readonly IRoleGroupRoleRepository _roleGroupRoleRepository;
+        public RoleGroupAppsService(ILogger<RoleGroupAppsService> logger, IRoleGroupRepository roleGroupRepository, IMapper mapper, ICurrentUserAppService currentUserAppService,
+            IRoleGroupRoleRepository roleGroupRoleRepository)
         {
             _logger = logger;
             _mapper = mapper;
             _roleGroupRepository = roleGroupRepository;
             _currentUserAppService = currentUserAppService;
+            _roleGroupRoleRepository = roleGroupRoleRepository;
         }
 
         public async Task<PagedResultDto<RoleGroupDto>> GetAllRoleGroupsAsync(PagedRequestDto<RoleGroupFilterDto> pagedRequestRoleGroupDto)
@@ -111,6 +116,15 @@ namespace RoomRentalManagerServer.Application.Services
                 else
                 {
                     await AddRoleGroupAsync(roleGroup);
+                    foreach(var item in createOrEditRoleGroupDto.RoleDtos)
+                    {
+                        var roleGroupRole = new RoleGroupRole
+                        {
+                            RoleGroupId = roleGroup.Id,
+                            RoleId = item.Id
+                        };
+                        await AddRoleGroupRole(roleGroupRole);
+                    }
                 }
 
                 return true;
@@ -144,6 +158,29 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
+        public async Task<RoleGroupRole?> AddRoleGroupRole(RoleGroupRole roleGroupRole)
+        {
+            try
+            {
+                if (!_currentUserAppService.IsAuthenticated)
+                {
+                    throw new UnauthorizedAccessException("User is not authenticated.");
+                }
+                var userName = _currentUserAppService.UserName ?? throw new InvalidOperationException("User is null.");
+                roleGroupRole.CreatedBy = userName;
+                roleGroupRole.UpdatedBy = userName;
+                roleGroupRole.CreatedAt = DateTime.UtcNow;
+                roleGroupRole.UpdatedAt = DateTime.UtcNow;
+                await _roleGroupRoleRepository.AddAsync(roleGroupRole);
+                return roleGroupRole;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add RoleGroupRole");
+                throw;
+            }
+        }
+
         public async Task UpdateRoleGroupAsync(RoleGroup roleGroup)
         {
             try
@@ -155,6 +192,27 @@ namespace RoomRentalManagerServer.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update room rental");
+                throw;
+            }
+        }
+
+        public async Task<RoleGroupRole?> UpdateRoleGroupRole(RoleGroupRole roleGroupRole)
+        {
+            try
+            {
+                if (!_currentUserAppService.IsAuthenticated)
+                {
+                    throw new UnauthorizedAccessException("User is not authenticated.");
+                }
+                var userName = _currentUserAppService.UserName ?? throw new InvalidOperationException("User is null.");
+                roleGroupRole.UpdatedBy = userName;
+                roleGroupRole.UpdatedAt = DateTime.Now;
+                await _roleGroupRoleRepository.UpdateAsync(roleGroupRole);
+                return roleGroupRole;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add RoleGroupRole");
                 throw;
             }
         }
@@ -174,6 +232,25 @@ namespace RoomRentalManagerServer.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to delete room rental with id {Id}", id);
+                throw;
+            }
+        }
+
+        public async Task DeleteRoleGroupRoleAsync(long id)
+        {
+            try
+            {
+                var roleGroupRole = await _roleGroupRoleRepository.GetByIdAsync(id);
+                if (roleGroupRole == null)
+                {
+                    _logger.LogWarning("Role Group Role with id {Id} not found when attempting delete", id);
+                    throw new KeyNotFoundException($"Role Group Role with id {id} not found.");
+                }
+                await _roleGroupRoleRepository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to delete Role Group Role with id {Id}", id);
                 throw;
             }
         }
