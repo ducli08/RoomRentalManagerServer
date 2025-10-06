@@ -118,12 +118,15 @@ namespace RoomRentalManagerServer.Application.Services
                     await AddRoleGroupAsync(roleGroup);
                     foreach(var item in createOrEditRoleGroupDto.RoleDtos)
                     {
-                        var roleGroupRole = new RoleGroupPermission
+                        foreach(var permission in item.Permissions)
                         {
-                            RoleGroupId = roleGroup.Id,
-                            PermissionId = item.Id
-                        };
-                        await AddRoleGroupPermission(roleGroupRole);
+                            var roleGroupRole = new RoleGroupPermission
+                            {
+                                RoleGroupId = roleGroup.Id,
+                                PermissionId = permission.Id
+                            };
+                            await AddRoleGroupPermission(roleGroupRole);
+                        }
                     }
                 }
 
