@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole
+namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission
 {
-    [Table("roleGroupRole")]
-    public class RoleGroupRole
+    [Table("roleGroupPermission")]
+    public class RoleGroupPermission
     {
         [Key]
         [Column("id")]
@@ -13,8 +13,8 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole
         [Column("roleGroupId")]
         public long RoleGroupId { get; set; }
 
-        [Column("roleId")]
-        public long RoleId { get; set; }
+        [Column("permissionId")]
+        public long PermissionId { get; set; }
 
         [Column("createdAt")]
         public DateTime CreatedAt { get; set; }

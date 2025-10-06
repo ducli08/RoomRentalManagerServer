@@ -5,8 +5,8 @@ using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
-using RoomRentalManagerServer.Domain.Interfaces.RoleGroupRoleInterfaces;
-using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole;
+using RoomRentalManagerServer.Domain.Interfaces.RoleGroupPermissionInterfaces;
+using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
 
 namespace RoomRentalManagerServer.Application.Services
@@ -17,15 +17,15 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IMapper _mapper;
         private readonly IRoleGroupRepository _roleGroupRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
-        private readonly IRoleGroupRoleRepository _roleGroupRoleRepository;
+        private readonly IRoleGroupPermissionRepository _roleGroupPermissionRepository;
         public RoleGroupAppsService(ILogger<RoleGroupAppsService> logger, IRoleGroupRepository roleGroupRepository, IMapper mapper, ICurrentUserAppService currentUserAppService,
-            IRoleGroupRoleRepository roleGroupRoleRepository)
+            IRoleGroupPermissionRepository roleGroupPermissionRepository)
         {
             _logger = logger;
             _mapper = mapper;
             _roleGroupRepository = roleGroupRepository;
             _currentUserAppService = currentUserAppService;
-            _roleGroupRoleRepository = roleGroupRoleRepository;
+            _roleGroupPermissionRepository = roleGroupPermissionRepository;
         }
 
         public async Task<PagedResultDto<RoleGroupDto>> GetAllRoleGroupsAsync(PagedRequestDto<RoleGroupFilterDto> pagedRequestRoleGroupDto)
@@ -118,12 +118,12 @@ namespace RoomRentalManagerServer.Application.Services
                     await AddRoleGroupAsync(roleGroup);
                     foreach(var item in createOrEditRoleGroupDto.RoleDtos)
                     {
-                        var roleGroupRole = new RoleGroupRole
+                        var roleGroupRole = new RoleGroupPermission
                         {
                             RoleGroupId = roleGroup.Id,
-                            RoleId = item.Id
+                            PermissionId = item.Id
                         };
-                        await AddRoleGroupRole(roleGroupRole);
+                        await AddRoleGroupPermission(roleGroupRole);
                     }
                 }
 
@@ -158,7 +158,7 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
-        public async Task<RoleGroupRole?> AddRoleGroupRole(RoleGroupRole roleGroupRole)
+        public async Task<RoleGroupPermission?> AddRoleGroupPermission(RoleGroupPermission roleGroupPermission)
         {
             try
             {
@@ -167,12 +167,12 @@ namespace RoomRentalManagerServer.Application.Services
                     throw new UnauthorizedAccessException("User is not authenticated.");
                 }
                 var userName = _currentUserAppService.UserName ?? throw new InvalidOperationException("User is null.");
-                roleGroupRole.CreatedBy = userName;
-                roleGroupRole.UpdatedBy = userName;
-                roleGroupRole.CreatedAt = DateTime.UtcNow;
-                roleGroupRole.UpdatedAt = DateTime.UtcNow;
-                await _roleGroupRoleRepository.AddAsync(roleGroupRole);
-                return roleGroupRole;
+                roleGroupPermission.CreatedBy = userName;
+                roleGroupPermission.UpdatedBy = userName;
+                roleGroupPermission.CreatedAt = DateTime.UtcNow;
+                roleGroupPermission.UpdatedAt = DateTime.UtcNow;
+                await _roleGroupPermissionRepository.AddAsync(roleGroupPermission);
+                return roleGroupPermission;
             }
             catch (Exception ex)
             {
@@ -196,7 +196,7 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
-        public async Task<RoleGroupRole?> UpdateRoleGroupRole(RoleGroupRole roleGroupRole)
+        public async Task<RoleGroupPermission?> UpdateRoleGroupPermission(RoleGroupPermission roleGroupPermission)
         {
             try
             {
@@ -205,14 +205,14 @@ namespace RoomRentalManagerServer.Application.Services
                     throw new UnauthorizedAccessException("User is not authenticated.");
                 }
                 var userName = _currentUserAppService.UserName ?? throw new InvalidOperationException("User is null.");
-                roleGroupRole.UpdatedBy = userName;
-                roleGroupRole.UpdatedAt = DateTime.Now;
-                await _roleGroupRoleRepository.UpdateAsync(roleGroupRole);
-                return roleGroupRole;
+                roleGroupPermission.UpdatedBy = userName;
+                roleGroupPermission.UpdatedAt = DateTime.Now;
+                await _roleGroupPermissionRepository.UpdateAsync(roleGroupPermission);
+                return roleGroupPermission;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add RoleGroupRole");
+                _logger.LogError(ex, "Failed to add RoleGroupPermission");
                 throw;
             }
         }
@@ -236,21 +236,21 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
-        public async Task DeleteRoleGroupRoleAsync(long id)
+        public async Task DeleteRoleGroupPermissionAsync(long id)
         {
             try
             {
-                var roleGroupRole = await _roleGroupRoleRepository.GetByIdAsync(id);
-                if (roleGroupRole == null)
+                var roleGroupPermission = await _roleGroupPermissionRepository.GetByIdAsync(id);
+                if (roleGroupPermission == null)
                 {
-                    _logger.LogWarning("Role Group Role with id {Id} not found when attempting delete", id);
-                    throw new KeyNotFoundException($"Role Group Role with id {id} not found.");
+                    _logger.LogWarning("Role Group Permission with id {Id} not found when attempting delete", id);
+                    throw new KeyNotFoundException($"Role Group Permission with id {id} not found.");
                 }
-                await _roleGroupRoleRepository.DeleteAsync(id);
+                await _roleGroupPermissionRepository.DeleteAsync(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to delete Role Group Role with id {Id}", id);
+                _logger.LogError(ex, "Failed to delete Role Group Permission with id {Id}", id);
                 throw;
             }
         }

@@ -1,21 +1,20 @@
 using RoomRentalManagerServer.Application.Interfaces;
-using RoomRentalManagerServer.Domain.Interfaces.RoleGroupRoleInterfaces;
-using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupRole;
+using RoomRentalManagerServer.Domain.Interfaces.RoleGroupPermissionInterfaces;
 
 namespace RoomRentalManagerServer.Application.Services
 {
-    public class RoleGroupRoleAppService : IRoleGroupRoleAppService
+    public class RoleGroupPermissionAppService : IRoleGroupPermissionAppService
     {
-        private readonly IRoleGroupRoleRepository _roleGroupRoleRepository;
-        public RoleGroupRoleAppService(IRoleGroupRoleRepository roleGroupRoleRepository)
+        private readonly IRoleGroupPermissionRepository _roleGroupPermissionRepository;
+        public RoleGroupPermissionAppService(IRoleGroupPermissionRepository roleGroupPermissionRepository)
         {
-            _roleGroupRoleRepository = roleGroupRoleRepository;
+            _roleGroupPermissionRepository = roleGroupPermissionRepository;
         }
 
-        public async Task<List<long>> GetRoleByRoleGroupIdAsync(long roleGroupId)
+        public async Task<List<long>> GetRoleByPermissionGroupIdAsync(long roleGroupId)
         {
-            var query = await _roleGroupRoleRepository.GetByIdAsync(roleGroupId);
-            var list = query.Select(x => x.RoleId).ToList();
+            var query = await _roleGroupPermissionRepository.GetByIdAsync(roleGroupId);
+            var list = query.Select(x => x.PermissionId).ToList();
             return list;
         }
 

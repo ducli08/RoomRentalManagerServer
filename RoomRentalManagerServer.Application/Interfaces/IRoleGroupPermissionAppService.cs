@@ -1,6 +1,6 @@
 namespace RoomRentalManagerServer.Application.Interfaces
 {
-    public interface IRoleGroupRoleAppService
+    public interface IRoleGroupPermissionAppService
     {
         //Task<List<long>> GetRolesByRoleGroupIdAsync(long roleGroupId);
     }
