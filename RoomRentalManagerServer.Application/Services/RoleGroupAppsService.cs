@@ -238,24 +238,5 @@ namespace RoomRentalManagerServer.Application.Services
                 throw;
             }
         }
-
-        public async Task DeleteRoleGroupPermissionAsync(long id)
-        {
-            try
-            {
-                var roleGroupPermission = await _roleGroupPermissionRepository.GetByIdAsync(id);
-                if (roleGroupPermission == null)
-                {
-                    _logger.LogWarning("Role Group Permission with id {Id} not found when attempting delete", id);
-                    throw new KeyNotFoundException($"Role Group Permission with id {id} not found.");
-                }
-                await _roleGroupPermissionRepository.DeleteAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to delete Role Group Permission with id {Id}", id);
-                throw;
-            }
-        }
     }
 }

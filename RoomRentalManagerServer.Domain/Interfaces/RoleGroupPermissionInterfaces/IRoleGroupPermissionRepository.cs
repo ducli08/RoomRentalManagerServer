@@ -5,7 +5,7 @@ namespace RoomRentalManagerServer.Domain.Interfaces.RoleGroupPermissionInterface
     public interface IRoleGroupPermissionRepository
     {
         Task<RoleGroupPermission> AddAsync(RoleGroupPermission entity);
-        Task<bool> DeleteAsync(long id);
+        Task<bool> DeleteActivePermissionByRoleGroupIdAsync(long id);
         Task<IQueryable<RoleGroupPermission>> GetByIdAsync(long id);
         Task<bool> UpdateAsync(RoleGroupPermission entity);
         Task<IQueryable<RoleGroupPermission>> GetAllQueryAsync();

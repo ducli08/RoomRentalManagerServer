@@ -13,12 +13,15 @@ namespace RoomRentalManagerServer.API.Controllers
         private readonly IRoleGroupAppService _roleGroupAppService;
         private readonly ILogger<RoleGroupController> _logger;
         private readonly IRoleAppService _roleAppService;
+        private readonly IRoleGroupPermissionAppService _roleGroupPermissionAppService;
 
-        public RoleGroupController(IRoleGroupAppService roleGroupAppService, ILogger<RoleGroupController> logger, IRoleAppService roleAppService)
+        public RoleGroupController(IRoleGroupAppService roleGroupAppService, ILogger<RoleGroupController> logger, IRoleAppService roleAppService,
+            IRoleGroupPermissionAppService roleGroupPermissionAppService)
         {
             _roleGroupAppService = roleGroupAppService;
             _logger = logger;
             _roleAppService = roleAppService;
+            _roleGroupPermissionAppService = roleGroupPermissionAppService;
         }
 
         [HttpPost("getAllRoleGroupsAsync")]
@@ -62,6 +65,7 @@ namespace RoomRentalManagerServer.API.Controllers
             if (existing == null)
                 return NotFound(new { message = "Room rental not found." });
             await _roleGroupAppService.DeleteRoleGroupAsync(id);
+            await _roleGroupPermissionAppService.DeleteActivePermissionByRoleGroupIdAsync(id);
             return NoContent();
         }
 
@@ -77,6 +81,20 @@ namespace RoomRentalManagerServer.API.Controllers
             {
                 _logger.LogError(ex, "An error occurred while retrieving roles.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while retrieving roles." });
+            }
+        }
+        [HttpGet("getActivePermission")]
+        public async Task<List<long>> GetActivePermission(long roleGroupId)
+        {
+            try
+            {
+                var activePermission = await _roleGroupPermissionAppService.GetActivePermissionByRoleGroupIdAsync(roleGroupId);
+                return activePermission != null ? activePermission : new List<long>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving active permissions.");
+                throw;
             }
         }
         

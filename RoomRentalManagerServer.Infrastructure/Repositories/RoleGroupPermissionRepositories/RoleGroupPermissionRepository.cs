@@ -31,13 +31,13 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.RoleGroupRoleRepos
             }
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        public async Task<bool> DeleteActivePermissionByRoleGroupIdAsync(long id)
         {
             try
             {
-                var entity = await _context.RoleGroupPermission.FirstOrDefaultAsync(x => x.Id == id);
+                var entity = await _context.RoleGroupPermission.Where(x => x.RoleGroupId == id).ToListAsync();
                 if (entity == null) return false;
-                _context.RoleGroupPermission.Remove(entity);
+                _context.RoleGroupPermission.RemoveRange(entity);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
