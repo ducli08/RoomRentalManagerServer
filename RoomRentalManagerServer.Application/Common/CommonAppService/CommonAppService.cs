@@ -15,8 +15,9 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
         private readonly IDistrictAppService _districtAppService;
         private readonly IUserAppService _userAppService;
         private readonly IRoomRentalAppService _roomRentalAppService;
+        private readonly IRoleGroupAppService _roleGroupAppService;
         public CommonAppService(ILogger<CommonAppService> logger, IWardAppService wardAppService, IProvinceAppService provinceAppService,
-            IDistrictAppService districtAppService, IUserAppService userAppService, IRoomRentalAppService roomRentalAppService)
+            IDistrictAppService districtAppService, IUserAppService userAppService, IRoomRentalAppService roomRentalAppService, IRoleGroupAppService roleGroupAppService)
         {
             _logger = logger;
             _wardAppService = wardAppService;
@@ -24,6 +25,7 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
             _districtAppService = districtAppService;
             _userAppService = userAppService;
             _roomRentalAppService = roomRentalAppService;
+            _roleGroupAppService = roleGroupAppService;
         }
 
         public async Task<List<SelectListItemDto>> GetCustomSelectListItem(string typeSelect, string cascadeValue)
@@ -69,6 +71,14 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
                     {
                         Value = r.Id.ToString(),
                         Text = r.RoomNumber.ToString()
+                    }));
+                    break;
+                case "roleGroups":
+                    var roleGroups = await _roleGroupAppService.GetAllRoleGroupAsync();
+                    roleGroups.ForEach(r => selectListItemDtos.Add(new SelectListItemDto
+                    {
+                        Value = r.Id.ToString(),
+                        Text = r.Name.ToString()
                     }));
                     break;
                 default:

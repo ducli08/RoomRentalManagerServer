@@ -12,5 +12,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
         Task UpdateRoleGroupAsync(RoleGroup roleGroup);
         Task<RoleGroupDto> AddRoleGroupAsync(RoleGroup roleGroup);
         Task DeleteRoleGroupAsync(long id);
+        Task<List<RoleGroup>> GetAllRoleGroupAsync();
     }
 }

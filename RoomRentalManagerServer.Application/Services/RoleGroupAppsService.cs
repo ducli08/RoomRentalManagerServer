@@ -1,13 +1,17 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.RoleGroupsModel.Dto;
+using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
 using RoomRentalManagerServer.Domain.Interfaces.RoleGroupPermissionInterfaces;
+using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
+using System.Diagnostics;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -18,14 +22,18 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IRoleGroupRepository _roleGroupRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
         private readonly IRoleGroupPermissionRepository _roleGroupPermissionRepository;
+        private readonly IRedisCacheService _redisCacheService;
+        private readonly IConfiguration _configuration;
         public RoleGroupAppsService(ILogger<RoleGroupAppsService> logger, IRoleGroupRepository roleGroupRepository, IMapper mapper, ICurrentUserAppService currentUserAppService,
-            IRoleGroupPermissionRepository roleGroupPermissionRepository)
+            IRoleGroupPermissionRepository roleGroupPermissionRepository, IRedisCacheService redisCacheService, IConfiguration configuration)
         {
             _logger = logger;
             _mapper = mapper;
             _roleGroupRepository = roleGroupRepository;
             _currentUserAppService = currentUserAppService;
             _roleGroupPermissionRepository = roleGroupPermissionRepository;
+            _redisCacheService = redisCacheService;
+            _configuration = configuration;
         }
 
         public async Task<PagedResultDto<RoleGroupDto>> GetAllRoleGroupsAsync(PagedRequestDto<RoleGroupFilterDto> pagedRequestRoleGroupDto)
@@ -235,6 +243,46 @@ namespace RoomRentalManagerServer.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to delete room rental with id {Id}", id);
+                throw;
+            }
+        }
+
+        public async Task<List<RoleGroup>> GetAllRoleGroupAsync()
+        {
+            try
+            {
+                Stopwatch stC = new Stopwatch();
+                stC.Start();
+                Stopwatch st = new Stopwatch();
+                st.Start();
+                var value = await _redisCacheService.GetAsync<RoleGroup>(_configuration["Redis:Keys:RoleGroup"]);
+                var roleGroup = new List<RoleGroup>();
+                if (value != null && value?.Count != 0)
+                {
+                    roleGroup = value;
+                    stC.Stop();
+                    _logger.LogInformation($"GetAllRoleGroupAsync from Redis Cache: {stC.ElapsedMilliseconds} ms");
+                }
+                else
+                {
+                    var roleGroupsQuery = await _roleGroupRepository.GetAllRoleGroupAsync();
+                    roleGroup = await roleGroupsQuery.ToListAsync();
+                    st.Stop();
+                    _logger.LogInformation($"GetAllProvincesAsync from Database: {st.ElapsedMilliseconds} ms");
+                    if (roleGroup != null)
+                    {
+                        st.Start();
+                        await _redisCacheService.SetAsync<RoleGroup>(_configuration["Redis:Keys:RoleGroup"], roleGroup, TimeSpan.FromMinutes(30));
+                        st.Stop();
+                        _logger.LogInformation($"Time to set cache Province into Redis {st.ElapsedMilliseconds} ms");
+                    }
+
+                }
+                return roleGroup;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting all provinces");
                 throw;
             }
         }
