@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.Login.Dto;
+using RoomRentalManagerServer.Application.Model.Roles.Dto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
+using System.Security;
 
 namespace RoomRentalManagerServer.API.Controllers
 {
@@ -12,19 +14,22 @@ namespace RoomRentalManagerServer.API.Controllers
     {
         private readonly IUserAppService _userAppService;
         private readonly IRedisCacheService _redisCacheService;
-        private readonly IRoleGroupAppService _roleGroupAppService;
+        private readonly IRoleGroupPermissionAppService _roleGroupPermissionAppService;
+        private readonly IRoleAppService _roleAppService;
         private readonly ILogger<UserController> _logger;
         private readonly IJwtTokenAppService _jwtTokenAppService;
         private readonly IConfiguration _configuration;
         public LoginController(IUserAppService userAppService, IRedisCacheService redisCacheService, ILogger<UserController> logger,
-            IRoleGroupAppService roleGroupAppService, IJwtTokenAppService jwtTokenAppService, IConfiguration configuration)
+            IRoleGroupAppService roleGroupAppService, IJwtTokenAppService jwtTokenAppService, IConfiguration configuration,
+            IRoleGroupPermissionAppService roleGroupPermissionAppService, IRoleAppService roleAppService)
         {
             _userAppService = userAppService;
             _redisCacheService = redisCacheService;
-            _roleGroupAppService = roleGroupAppService;
             _logger = logger;
             _jwtTokenAppService = jwtTokenAppService;
             _configuration = configuration;
+            _roleGroupPermissionAppService = roleGroupPermissionAppService;
+            _roleAppService = roleAppService;
         }
         [HttpPost]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
@@ -32,12 +37,27 @@ namespace RoomRentalManagerServer.API.Controllers
         {
             var expiresInMinutes = _configuration.GetSection("Jwt")["ExpiresInMinutes"];
             var expires = DateTime.UtcNow.AddMinutes(int.Parse(expiresInMinutes ?? "30"));
+            var lstStringPermission = new List<string>();
             var user = await _userAppService.Authentication(username, password);
             if (user == null)
             {
                 return Unauthorized(new { message = "Invalid username or password" });
             }
-
+            if (!string.IsNullOrEmpty(user.RoleGroupId))
+            {
+                long.TryParse(user.RoleGroupId, out long roleGroupId);
+                var lstPermissionId = await _roleGroupPermissionAppService.GetActivePermissionByRoleGroupIdAsync(roleGroupId);
+                var rolePermissions = await _roleGroupPermissionAppService.GetActiveRolePermissionByPermissionId(lstPermissionId);
+                var roles = await _roleAppService.GetAllRoleAsync();
+                var rolesDic = roles.ToDictionary(x => x.Id);
+                foreach(var item in rolePermissions)
+                {
+                    rolesDic.TryGetValue(item.RoleId, out var role);
+                    var permissionName = role?.Permissions.FirstOrDefault(x => x.Id == item.PermissionId)?.Name;
+                    var rolePermissionName = role?.Name + "." + permissionName;
+                    lstStringPermission.Add(rolePermissionName);
+                }
+            }
             var accessToken = _jwtTokenAppService.GenerateToken(user.Id, user.Name, expires);
 
             string? refreshToken = null;
@@ -65,7 +85,8 @@ namespace RoomRentalManagerServer.API.Controllers
                ExpiresAt = expires,
                ExpiresIn = (int)(expires - DateTime.UtcNow).TotalSeconds,
                RefreshExpiresAt = refreshExpiresAt,
-               RefreshExpiresIn = refreshExpiresIn
+               RefreshExpiresIn = refreshExpiresIn,
+               RoleGroupPermissions = lstStringPermission
             };
 
             // if refresh provided, include optionally as additional headers? For now attach to response body via dynamic

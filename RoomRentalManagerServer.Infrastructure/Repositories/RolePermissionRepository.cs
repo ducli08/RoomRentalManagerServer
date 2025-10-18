@@ -29,6 +29,23 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories
             }
         }
         
+        public async Task<List<RolePermission>> GetAllRolePermissionByListPermissionIdsAsync(List<long> permissionIds)
+        {
+            try
+            {
+                var result = _context.RolePermission
+                    .Where(rp => permissionIds.Contains(rp.PermissionId))
+                    .AsNoTracking();
+
+                return await result.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get role permissions by list of role IDs: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<List<RolePermission>> GetAllRolePermissionByListRoleIdAsync(List<long> listRoleId)
         {
             try
