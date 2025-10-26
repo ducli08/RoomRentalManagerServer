@@ -18,4 +18,6 @@ RUN dotnet publish "RoomRentalManagerServer.API.csproj" -c Release -o /App/out /
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /App
 COPY --from=build /App/out .
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Development
 ENTRYPOINT ["dotnet", "RoomRentalManagerServer.API.dll"]
