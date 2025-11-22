@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.Login.Dto;
 using RoomRentalManagerServer.Application.Model.Roles.Dto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.RedisCache;
 using System.Security;
+using System.Security.Claims;
 
 namespace RoomRentalManagerServer.API.Controllers
 {
@@ -137,11 +139,34 @@ namespace RoomRentalManagerServer.API.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] long userId)
+        public async Task<IActionResult> Logout([FromBody] LogoutDto request)
         {
-            var key = $"refresh_{userId}";
-            await _redisCacheService.RemoveAsync(key);
-            return NoContent();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(!long.TryParse(userIdClaim, out var userId))
+                return Unauthorized(new { message = "Invalid user" });
+            var refreshKey = $"refresh_{userId}";
+            if(request != null && !string.IsNullOrEmpty(request.RefreshToken))
+            {
+                var tokens = await _redisCacheService.GetAsync<string>(refreshKey);
+                if(tokens != null && tokens.Count > 0)
+                {
+                    tokens.RemoveAll(t => t == request.RefreshToken);
+                    if(tokens.Count > 0)
+                    {
+                        await _redisCacheService.SetAsync(refreshKey, tokens, TimeSpan.FromDays(7));
+                    }
+                    else
+                    {
+                        await _redisCacheService.RemoveAsync(refreshKey);
+                    }    
+                }
+            }
+            else
+            {
+                await _redisCacheService.RemoveAsync(refreshKey);
+            }    
+            await _redisCacheService.RemoveAsync(userId.ToString());
+            return Ok(new { message = "Logout successful" });
         }
 
         // wrapper helper to set cached user as list<UserDto> to match existing Redis API
