@@ -10,5 +10,7 @@ namespace RoomRentalManagerServer.Domain.Interfaces.UserInterfaces
         Task UpdateAsync(Users user);
         Task DeleteAsync(long id);
         Task<Users> GetUserByEmail(string email);
+        Task<Users?> GetUserByProviderAsync(string provider, string providerId);
+        Task<Users?> GetUserByEmailOrProviderAsync(string email, string provider, string providerId);
     }
 }

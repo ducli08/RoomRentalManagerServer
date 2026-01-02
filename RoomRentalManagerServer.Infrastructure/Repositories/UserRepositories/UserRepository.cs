@@ -94,6 +94,18 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
                 existUser.PhoneNumber = user.PhoneNumber;
                 existUser.UpdatedDate = DateTime.UtcNow;
                 existUser.LastUpdateUser = user.LastUpdateUser;
+                if (!string.IsNullOrEmpty(user.Provider))
+                {
+                    existUser.Provider = user.Provider;
+                }
+                if (!string.IsNullOrEmpty(user.ProviderId))
+                {
+                    existUser.ProviderId = user.ProviderId;
+                }
+                if (!string.IsNullOrEmpty(user.Avatar))
+                {
+                    existUser.Avatar = user.Avatar;
+                }
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -123,6 +135,40 @@ namespace RoomRentalManagerServer.Infrastructure.Repositories.UserRepository
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to check if user exists: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Users?> GetUserByProviderAsync(string provider, string providerId)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderId == providerId);
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get user by provider: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Users?> GetUserByEmailOrProviderAsync(string email, string provider, string providerId)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => 
+                        (x.Email == email) || 
+                        (x.Provider == provider && x.ProviderId == providerId));
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get user by email or provider: {ex.Message}");
                 throw;
             }
         }

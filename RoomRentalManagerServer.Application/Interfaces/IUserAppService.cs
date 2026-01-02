@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using RoomRentalManagerServer.Application.Common.CommonDto;
+using RoomRentalManagerServer.Application.Model.Login.Dto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
 using System;
@@ -19,5 +20,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
         Task DeleteUserAsync(long id);
         Task<UserDto> Authentication(string username, string password);
         Task<List<Users>> GetAllUserForSelectListItem();
+        Task<UserDto> FindOrCreateGoogleUserAsync(GoogleTokenPayload googlePayload);
     }
 }

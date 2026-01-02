@@ -83,5 +83,11 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
         [Column("avatar")]
         [Display(Name = "Ảnh đại diện", Order = 18)]
         public string Avatar { get; set; }
+
+        [Column("provider")]
+        public string Provider { get; set; }
+
+        [Column("providerId")]
+        public string ProviderId { get; set; }
     }
 }
