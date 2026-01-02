@@ -21,9 +21,11 @@ namespace RoomRentalManagerServer.API.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly IJwtTokenAppService _jwtTokenAppService;
         private readonly IConfiguration _configuration;
+        private readonly IGoogleTokenValidatorAppService _googleTokenValidatorAppService;
         public LoginController(IUserAppService userAppService, IRedisCacheService redisCacheService, ILogger<UserController> logger,
             IRoleGroupAppService roleGroupAppService, IJwtTokenAppService jwtTokenAppService, IConfiguration configuration,
-            IRoleGroupPermissionAppService roleGroupPermissionAppService, IRoleAppService roleAppService)
+            IRoleGroupPermissionAppService roleGroupPermissionAppService, IRoleAppService roleAppService,
+            IGoogleTokenValidatorAppService googleTokenValidatorAppService)
         {
             _userAppService = userAppService;
             _redisCacheService = redisCacheService;
@@ -32,6 +34,7 @@ namespace RoomRentalManagerServer.API.Controllers
             _configuration = configuration;
             _roleGroupPermissionAppService = roleGroupPermissionAppService;
             _roleAppService = roleAppService;
+            _googleTokenValidatorAppService = googleTokenValidatorAppService;
         }
         [HttpPost]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
@@ -173,6 +176,99 @@ namespace RoomRentalManagerServer.API.Controllers
         private async Task _redisCache_service_SetUserAsync(string key, UserDto user, TimeSpan? expiry)
         {
             await _redisCacheService.SetAsync(key, new List<UserDto> { user }, expiry);
+        }
+
+        [HttpPost("google")]
+        [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginRequestDto request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.IdToken))
+            {
+                return BadRequest(new { message = "Invalid request. IdToken is required." });
+            }
+
+            try
+            {
+                // Validate Google ID token
+                var googlePayload = await _googleTokenValidatorAppService.ValidateIdTokenAsync(request.IdToken);
+                if (googlePayload == null)
+                {
+                    return Unauthorized(new { message = "Invalid Google token" });
+                }
+
+                // Check if email is verified
+                if (!googlePayload.EmailVerified)
+                {
+                    return BadRequest(new { message = "Email not verified by Google" });
+                }
+
+                // Find or create user
+                var user = await _userAppService.FindOrCreateGoogleUserAsync(googlePayload);
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Failed to authenticate user" });
+                }
+
+                // Generate JWT tokens (same flow as regular login)
+                var expiresInMinutes = _configuration.GetSection("Jwt")["ExpiresInMinutes"];
+                var expires = DateTime.UtcNow.AddMinutes(int.Parse(expiresInMinutes ?? "30"));
+                var lstStringPermission = new List<string>();
+
+                // Get permissions if user has role group
+                if (!string.IsNullOrEmpty(user.RoleGroupId))
+                {
+                    long.TryParse(user.RoleGroupId, out long roleGroupId);
+                    var lstPermissionId = await _roleGroupPermissionAppService.GetActivePermissionByRoleGroupIdAsync(roleGroupId);
+                    var rolePermissions = await _roleGroupPermissionAppService.GetActiveRolePermissionByPermissionId(lstPermissionId);
+                    var roles = await _roleAppService.GetAllRoleAsync();
+                    var rolesDic = roles.ToDictionary(x => x.Id);
+                    foreach (var item in rolePermissions)
+                    {
+                        rolesDic.TryGetValue(item.RoleId, out var role);
+                        var permissionName = role?.Permissions.FirstOrDefault(x => x.Id == item.PermissionId)?.Name;
+                        var rolePermissionName = role?.Name + "." + permissionName;
+                        lstStringPermission.Add(rolePermissionName);
+                    }
+                }
+
+                var accessToken = _jwtTokenAppService.GenerateToken(user.Id, user.Name, expires);
+
+                string? refreshToken = null;
+                DateTime? refreshExpiresAt = null;
+                int? refreshExpiresIn = null;
+                if (request.RememberMe)
+                {
+                    refreshToken = _jwtTokenAppService.GenerateRefreshToken();
+                    var expiry = TimeSpan.FromDays(7);
+                    await _redisCacheService.SetAsync<string>($"refresh_{user.Id}", new List<string> { refreshToken }, expiry);
+                    refreshExpiresAt = DateTime.UtcNow.Add(expiry);
+                    refreshExpiresIn = (int)expiry.TotalSeconds;
+                }
+
+                // Cache user info
+                var userCacheExpiry = request.RememberMe ? TimeSpan.FromDays(7) : TimeSpan.FromHours(1);
+                await _redisCache_service_SetUserAsync(user.Id.ToString(), user, userCacheExpiry);
+
+                var loginResponseDto = new LoginResponseDto
+                {
+                    Message = "Google login successful",
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    User = user,
+                    ExpiresAt = expires,
+                    ExpiresIn = (int)(expires - DateTime.UtcNow).TotalSeconds,
+                    RefreshExpiresAt = refreshExpiresAt,
+                    RefreshExpiresIn = refreshExpiresIn,
+                    RoleGroupPermissions = lstStringPermission
+                };
+
+                return Ok(loginResponseDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Google login error: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred during Google login" });
+            }
         }
     }
 }
