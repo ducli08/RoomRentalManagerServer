@@ -20,6 +20,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
         Task DeleteUserAsync(long id);
         Task<UserDto> Authentication(string username, string password);
         Task<List<Users>> GetAllUserForSelectListItem();
-        Task<UserDto> FindOrCreateGoogleUserAsync(GoogleTokenPayload googlePayload);
+        Task<UserDto> FindOrCreateGoogleUserAsync(GoogleTokenPayload googlePayload, string webRoot);
     }
 }
