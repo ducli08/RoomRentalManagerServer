@@ -1,13 +1,17 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
+using RoomRentalManagerServer.Application.Model.Login.Dto;
 using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
+using System.IO;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -18,13 +22,17 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
         private readonly ILocalFileStorageAppService _localFileStorageAppService;
-        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService)
+        private readonly IConfiguration _configuration;
+        private readonly IWebHost _webHostEnvironment;
+        
+        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService, IConfiguration configuration)
         {
             _logger = logger;
             _mapper = mapper;
             _userRepository = userRepository;
             _currentUserAppService = currentUserAppService;
             _localFileStorageAppService = localFileStorageAppService;
+            _configuration = configuration;
         }
 
         public async Task<(List<string> Paths, List<string> Errors)> UploadAvatarAsync(List<IFormFile> avatar, string webRoot)
@@ -211,6 +219,175 @@ namespace RoomRentalManagerServer.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to get all user for selectListItem: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task<string?> DownloadAndSaveGoogleAvatarAsync(string? googlePictureUrl, string webRoot)
+        {
+            if (string.IsNullOrEmpty(googlePictureUrl))
+                return null;
+
+            webRoot = webRoot ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var (localPath, error) = await _localFileStorageAppService.DownloadImageFromUrlAsync(googlePictureUrl, "uploads/avatar-images", webRoot);
+            
+            if (!string.IsNullOrEmpty(error))
+            {
+                _logger.LogWarning($"Failed to download Google avatar from {googlePictureUrl}: {error}");
+                return null;
+            }
+
+            return localPath;
+        }
+
+        private async Task DeleteOldAvatarIfExistsAsync(string? oldAvatarPath, string webRoot)
+        {
+            if (string.IsNullOrWhiteSpace(oldAvatarPath))
+                return;
+
+            // Only delete if it's a local path (not a URL)
+            if (oldAvatarPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                oldAvatarPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return; // It's a URL, not a local file
+            }
+
+            webRoot = webRoot ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            await _localFileStorageAppService.DeleteFileAsync(oldAvatarPath, webRoot);
+        }
+
+        public async Task<UserDto> FindOrCreateGoogleUserAsync(GoogleTokenPayload googlePayload, string webRoot)
+        {
+            try
+            {
+                if (googlePayload == null || string.IsNullOrEmpty(googlePayload.Sub) || string.IsNullOrEmpty(googlePayload.Email))
+                {
+                    _logger.LogWarning("Invalid Google token payload");
+                    throw new ArgumentException("Invalid Google token payload");
+                }
+
+                // First, try to find user by provider and providerId (Google sub)
+                var user = await _userRepository.GetUserByProviderAsync("Google", googlePayload.Sub);
+                
+                if (user != null)
+                {
+                    // User exists with this Google account, sync avatar if needed
+                    _logger.LogInformation($"Found existing Google user: {user.Email}");
+                    
+                    if (!string.IsNullOrEmpty(googlePayload.Picture))
+                    {
+                        // Check if avatar needs to be synced
+                        bool needsSync = string.IsNullOrEmpty(user.Avatar) || 
+                                       user.Avatar.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                                       user.Avatar.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+
+                        if (needsSync)
+                        {
+                            var oldAvatarPath = user.Avatar;
+                            var newAvatarPath = await DownloadAndSaveGoogleAvatarAsync(googlePayload.Picture, webRoot);
+                            
+                            if (!string.IsNullOrEmpty(newAvatarPath))
+                            {
+                                // Delete old avatar if it's a local file
+                                await DeleteOldAvatarIfExistsAsync(oldAvatarPath, webRoot);
+                                user.Avatar = newAvatarPath;
+                                user.UpdatedDate = DateTime.UtcNow;
+                                user.LastUpdateUser = "Google";
+                                await _userRepository.UpdateAsync(user);
+                                _logger.LogInformation($"Updated avatar for user {user.Email}");
+                            }
+                        }
+                    }
+                    
+                    return _mapper.Map<UserDto>(user);
+                }
+
+                // If not found by provider, check by email (for auto-linking)
+                var userByEmail = await _userRepository.GetUserByEmail(googlePayload.Email);
+                if (userByEmail != null)
+                {
+                    // User exists with this email but not linked to Google, link it
+                    _logger.LogInformation($"Linking existing user {userByEmail.Email} to Google account");
+                    userByEmail.Provider = "Google";
+                    userByEmail.ProviderId = googlePayload.Sub;
+                    
+                    if (!string.IsNullOrEmpty(googlePayload.Picture))
+                    {
+                        var oldAvatarPath = userByEmail.Avatar;
+                        var newAvatarPath = await DownloadAndSaveGoogleAvatarAsync(googlePayload.Picture, webRoot);
+                        
+                        if (!string.IsNullOrEmpty(newAvatarPath))
+                        {
+                            // Delete old avatar if it's a local file
+                            await DeleteOldAvatarIfExistsAsync(oldAvatarPath, webRoot);
+                            userByEmail.Avatar = newAvatarPath;
+                        }
+                        else
+                        {
+                            // If download fails, keep old avatar or set to Google URL as fallback
+                            if (string.IsNullOrEmpty(userByEmail.Avatar))
+                            {
+                                userByEmail.Avatar = googlePayload.Picture;
+                            }
+                        }
+                    }
+                    
+                    if (!string.IsNullOrEmpty(googlePayload.Name) && string.IsNullOrEmpty(userByEmail.Name))
+                    {
+                        userByEmail.Name = googlePayload.Name;
+                    }
+                    userByEmail.UpdatedDate = DateTime.UtcNow;
+                    userByEmail.LastUpdateUser = "Google";
+                    await _userRepository.UpdateAsync(userByEmail);
+                    return _mapper.Map<UserDto>(userByEmail);
+                }
+
+                // User doesn't exist, create new user
+                _logger.LogInformation($"Creating new Google user: {googlePayload.Email}");
+                var defaultRoleGroupId = _configuration["Google:DefaultRoleGroupId"];
+                int roleGroupId = 0;
+                if (!string.IsNullOrEmpty(defaultRoleGroupId) && int.TryParse(defaultRoleGroupId, out int parsedRoleId))
+                {
+                    roleGroupId = parsedRoleId;
+                }
+
+                string? avatarPath = null;
+                if (!string.IsNullOrEmpty(googlePayload.Picture))
+                {
+                    avatarPath = await DownloadAndSaveGoogleAvatarAsync(googlePayload.Picture, webRoot);
+                    if (string.IsNullOrEmpty(avatarPath))
+                    {
+                        // If download fails, use Google URL as fallback
+                        avatarPath = googlePayload.Picture;
+                        _logger.LogWarning($"Failed to download avatar for new user {googlePayload.Email}, using Google URL as fallback");
+                    }
+                }
+
+                var newUser = new Users
+                {
+                    Email = googlePayload.Email,
+                    Name = googlePayload.Name ?? googlePayload.Email,
+                    Provider = "Google",
+                    ProviderId = googlePayload.Sub,
+                    Avatar = avatarPath ?? string.Empty,
+                    RoleGroupId = roleGroupId,
+                    Password = Guid.NewGuid().ToString(), // Placeholder password for Google users (never used)
+                    CreatedDate = DateTime.UtcNow,
+                    UpdatedDate = DateTime.UtcNow,
+                    CreatorUser = "Google",
+                    LastUpdateUser = "Google"
+
+                };
+
+                // For Google users, we don't hash the password since it's just a placeholder
+                // We'll add directly to repository without going through AddAsync which hashes
+                newUser.CreatedDate = newUser.UpdatedDate = DateTime.UtcNow;
+                await _userRepository.AddAsync(newUser);
+                return _mapper.Map<UserDto>(newUser);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to find or create Google user: {ex.Message}");
                 throw;
             }
         }

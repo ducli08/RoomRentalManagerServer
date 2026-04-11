@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RoomRentalManagerServer.Infrastructure.Data;
@@ -12,9 +13,11 @@ using RoomRentalManagerServer.Infrastructure.Data;
 namespace RoomRentalManagerServer.Infrastructure.Migrations
 {
     [DbContext(typeof(RoomRentalManagerServerDbContext))]
-    partial class RoomRentalManagerServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251201142244_Update_User_Provider_20251201")]
+    partial class Update_User_Provider_20251201
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -705,14 +708,17 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("address");
 
                     b.Property<string>("Avatar")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("avatar");
 
                     b.Property<string>("BikeId")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("bikeId");
 
@@ -721,14 +727,16 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnName("createdDate");
 
                     b.Property<string>("CreatorUser")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("creatorUser");
 
-                    b.Property<DateTime?>("DateOfBirth")
+                    b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("dateofbirth");
 
                     b.Property<string>("DistrictCode")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("districtId");
 
@@ -738,18 +746,22 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnName("email");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("gender");
 
                     b.Property<string>("IDCard")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("idCard");
 
                     b.Property<string>("Job")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("job");
 
                     b.Property<string>("LastUpdateUser")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("lastUpdateUser");
 
@@ -764,18 +776,22 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnName("password");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("phoneNumber");
 
                     b.Property<string>("Provider")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("provider");
 
                     b.Property<string>("ProviderId")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("providerId");
 
                     b.Property<string>("ProvinceCode")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("provinceId");
 
@@ -788,6 +804,7 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnName("updatedDate");
 
                     b.Property<string>("WardCode")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("wardId");
 
