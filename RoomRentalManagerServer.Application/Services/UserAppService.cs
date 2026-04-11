@@ -376,6 +376,7 @@ namespace RoomRentalManagerServer.Application.Services
                     UpdatedDate = DateTime.UtcNow,
                     CreatorUser = "Google",
                     LastUpdateUser = "Google"
+
                 };
 
                 // For Google users, we don't hash the password since it's just a placeholder

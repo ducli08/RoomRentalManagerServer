@@ -26,43 +26,43 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
 
         [Column("provinceId")]
         [Display(Name = "Tỉnh/TP", Order = 4)]
-        public string ProvinceCode { get; set; }
+        public string? ProvinceCode { get; set; }
 
         [Column("districtId")]
         [Display(Name = "Quận/Huyện", Order = 5)]
-        public string DistrictCode { get; set; }
+        public string? DistrictCode { get; set; }
 
         [Column("wardId")]
         [Display(Name = "Xã/Phường", Order = 6)]
-        public string WardCode { get; set; }
+        public string? WardCode { get; set; }
 
         [Column("address")]
         [Display(Name = "Địa chỉ cụ thể", Order = 7)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [Column("idCard")]
         [Display(Name = "CCCD/CMT", Order = 8)]
-        public string IDCard { get; set; }
+        public string? IDCard { get; set; }
 
         [Column("job")]
         [Display(Name = "Công việc", Order = 9)]
-        public string Job { get; set; }
+        public string? Job { get; set; }
 
         [Column("dateofbirth")]
         [Display(Name = "Ngày tháng năm sinh", Order = 10)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         [Column("gender")]
         [Display(Name = "Giới tính", Order = 11)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         [Column("bikeId")]
         [Display(Name = "Phương tiện", Order = 12)]
-        public string BikeId { get; set; }
+        public string? BikeId { get; set; }
 
         [Column("phoneNumber")]
         [Display(Name = "Số điện thoại", Order = 13)]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [Column("createdDate")]
         [Display(Name = "Ngày tạo", Order = 14)]
@@ -74,20 +74,20 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
 
         [Column("creatorUser")]
         [Display(Name = "Người tạo", Order = 16)]
-        public string CreatorUser { get; set; }
+        public string? CreatorUser { get; set; }
 
         [Column("lastUpdateUser")]
         [Display(Name = "Người cập nhật", Order = 17)]
-        public string LastUpdateUser { get; set; }
+        public string? LastUpdateUser { get; set; }
 
         [Column("avatar")]
         [Display(Name = "Ảnh đại diện", Order = 18)]
-        public string Avatar { get; set; }
+        public string? Avatar { get; set; }
 
         [Column("provider")]
-        public string Provider { get; set; }
+        public string? Provider { get; set; }
 
         [Column("providerId")]
-        public string ProviderId { get; set; }
+        public string? ProviderId { get; set; }
     }
 }
