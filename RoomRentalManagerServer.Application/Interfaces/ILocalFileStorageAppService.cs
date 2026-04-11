@@ -9,5 +9,6 @@ namespace RoomRentalManagerServer.Application.Interfaces
 
         // Upload single file convenience helper
         Task<(string Path, string? Error)> UploadFileAsync(IFormFile file, string relativeFolder, string webRootPath);
+        Task<(string Path, string? Error)> DownloadImageFromUrlAsync(string imageUrl, string relativeFolder, string webRootPath);
     }
 }

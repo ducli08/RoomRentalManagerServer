@@ -52,6 +52,7 @@ foreach(var interfaceType in repositoryInterface)
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddSwaggerGen(x =>
 {
     x.AddServer(new OpenApiServer { Url = "https://localhost:7246" });

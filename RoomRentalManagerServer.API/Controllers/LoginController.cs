@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RoomRentalManagerServer.Application.Interfaces;
 using RoomRentalManagerServer.Application.Model.Login.Dto;
@@ -22,10 +22,11 @@ namespace RoomRentalManagerServer.API.Controllers
         private readonly IJwtTokenAppService _jwtTokenAppService;
         private readonly IConfiguration _configuration;
         private readonly IGoogleTokenValidatorAppService _googleTokenValidatorAppService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         public LoginController(IUserAppService userAppService, IRedisCacheService redisCacheService, ILogger<UserController> logger,
             IRoleGroupAppService roleGroupAppService, IJwtTokenAppService jwtTokenAppService, IConfiguration configuration,
             IRoleGroupPermissionAppService roleGroupPermissionAppService, IRoleAppService roleAppService,
-            IGoogleTokenValidatorAppService googleTokenValidatorAppService)
+            IGoogleTokenValidatorAppService googleTokenValidatorAppService, IWebHostEnvironment webHostEnvironment)
         {
             _userAppService = userAppService;
             _redisCacheService = redisCacheService;
@@ -35,6 +36,7 @@ namespace RoomRentalManagerServer.API.Controllers
             _roleGroupPermissionAppService = roleGroupPermissionAppService;
             _roleAppService = roleAppService;
             _googleTokenValidatorAppService = googleTokenValidatorAppService;
+            _webHostEnvironment = webHostEnvironment;
         }
         [HttpPost]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
@@ -203,7 +205,7 @@ namespace RoomRentalManagerServer.API.Controllers
                 }
 
                 // Find or create user
-                var user = await _userAppService.FindOrCreateGoogleUserAsync(googlePayload);
+                var user = await _userAppService.FindOrCreateGoogleUserAsync(googlePayload, _webHostEnvironment.WebRootPath);
                 if (user == null)
                 {
                     return Unauthorized(new { message = "Failed to authenticate user" });
