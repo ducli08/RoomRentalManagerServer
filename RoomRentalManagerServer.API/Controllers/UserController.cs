@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
@@ -115,17 +115,17 @@ namespace RoomRentalManagerServer.API.Controllers
                 return BadRequest(new { message = "No files received." });
 
             var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var (paths, errors) = await _userAppService.UploadAvatarAsync(avatar, webRoot);
+            var (paths, publicIds, errors) = await _userAppService.UploadAvatarAsync(avatar, webRoot);
 
             if (errors != null && errors.Any())
             {
                 if (errors.Contains("User is not authenticated."))
                     return Unauthorized(new { errors });
 
-                return BadRequest(new { paths, errors });
+                return BadRequest(new { paths, publicIds, errors });
             }
 
-            return Ok(new { paths });
+            return Ok(new { paths, publicIds });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,8 +24,9 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly ILocalFileStorageAppService _localFileStorageAppService;
         private readonly IConfiguration _configuration;
         private readonly IWebHost _webHostEnvironment;
+        private readonly RoomRentalManagerServer.Domain.Interfaces.ICloudinaryService _cloudinaryService;
         
-        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService, IConfiguration configuration)
+        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService, IConfiguration configuration, RoomRentalManagerServer.Domain.Interfaces.ICloudinaryService cloudinaryService)
         {
             _logger = logger;
             _mapper = mapper;
@@ -33,19 +34,46 @@ namespace RoomRentalManagerServer.Application.Services
             _currentUserAppService = currentUserAppService;
             _localFileStorageAppService = localFileStorageAppService;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
         }
 
-        public async Task<(List<string> Paths, List<string> Errors)> UploadAvatarAsync(List<IFormFile> avatar, string webRoot)
+        public async Task<(List<string> Paths, List<string> PublicIds, List<string> Errors)> UploadAvatarAsync(List<IFormFile> avatar, string webRoot)
         {
             if (!_currentUserAppService.IsAuthenticated)
             {
                 _logger.LogWarning("Unauthenticated user attempted to upload images");
-                return (new List<string>(), new List<string> { "User is not authenticated." });
+                return (new List<string>(), new List<string>(), new List<string> { "User is not authenticated." });
             }
 
-            // delegate to file storage service; relative folder without leading slash
-            var (paths, errors) = await _localFileStorageAppService.UploadFilesAsync(avatar, "uploads/avatar-images", webRoot);
-            return (paths, errors);
+            var paths = new List<string>();
+            var publicIds = new List<string>();
+            var errors = new List<string>();
+
+            foreach (var file in avatar)
+            {
+                if (file.Length > 0)
+                {
+                    try
+                    {
+                        var result = await _cloudinaryService.UploadImageAsync(file, "avatars");
+                        if (!string.IsNullOrEmpty(result.Url))
+                        {
+                            paths.Add(result.Url);
+                            publicIds.Add(result.PublicId);
+                        }
+                        else
+                        {
+                            errors.Add($"Failed to upload {file.FileName} to Cloudinary.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"Error uploading {file.FileName}: {ex.Message}");
+                    }
+                }
+            }
+
+            return (paths, publicIds, errors);
         }
 
         public async Task<bool> CreateOrEditUserAsync(CreateOrEditUserDto input)
@@ -170,6 +198,14 @@ namespace RoomRentalManagerServer.Application.Services
             try
             {
                 user.LastUpdateUser = _currentUserAppService.UserName;
+
+                var existingUser = await _userRepository.GetByIdAsync(user.Id);
+                if (existingUser != null && !string.IsNullOrEmpty(existingUser.AvatarPublicId) && existingUser.AvatarPublicId != user.AvatarPublicId)
+                {
+                    // If the user changed their avatar, delete the old one from Cloudinary 
+                    await _cloudinaryService.DeleteImageAsync(existingUser.AvatarPublicId);
+                }
+
                 await _userRepository.UpdateAsync(user);
             }
             catch (Exception ex)
@@ -376,6 +412,7 @@ namespace RoomRentalManagerServer.Application.Services
                     UpdatedDate = DateTime.UtcNow,
                     CreatorUser = "Google",
                     LastUpdateUser = "Google"
+
                 };
 
                 // For Google users, we don't hash the password since it's just a placeholder

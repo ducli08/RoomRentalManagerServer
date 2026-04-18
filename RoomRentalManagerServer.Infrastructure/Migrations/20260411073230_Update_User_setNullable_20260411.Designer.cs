@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RoomRentalManagerServer.Infrastructure.Data;
@@ -12,9 +13,11 @@ using RoomRentalManagerServer.Infrastructure.Data;
 namespace RoomRentalManagerServer.Infrastructure.Migrations
 {
     [DbContext(typeof(RoomRentalManagerServerDbContext))]
-    partial class RoomRentalManagerServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411073230_Update_User_setNullable_20260411")]
+    partial class Update_User_setNullable_20260411
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,25 +213,25 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("creatorUser");
 
+                    b.Property<byte[]>("Image")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("image");
+
                     b.Property<string>("ImageFileName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("imageFileName");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ImageType")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("imageUrl");
+                        .HasColumnName("imageType");
 
                     b.Property<string>("LastUpdateUser")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("lastUpdateUser");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("publicId");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone")
@@ -711,10 +714,6 @@ namespace RoomRentalManagerServer.Infrastructure.Migrations
                     b.Property<string>("Avatar")
                         .HasColumnType("text")
                         .HasColumnName("avatar");
-
-                    b.Property<string>("AvatarPublicId")
-                        .HasColumnType("text")
-                        .HasColumnName("avatarPublicId");
 
                     b.Property<string>("BikeId")
                         .HasColumnType("text")
