@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoomRentalManagerServer.Domain.ModelEntities.User
@@ -83,6 +83,9 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.User
         [Column("avatar")]
         [Display(Name = "Ảnh đại diện", Order = 18)]
         public string? Avatar { get; set; }
+
+        [Column("avatarPublicId")]
+        public string? AvatarPublicId { get; set; }
 
         [Column("provider")]
         public string? Provider { get; set; }
