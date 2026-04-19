@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using RoomRentalManagerServer.Application.Common.CommonAppService;
 using RoomRentalManagerServer.Application.Common.CommonDto;
@@ -17,15 +17,10 @@ namespace RoomRentalManagerServer.API.Controllers
             _commonAppService = commonAppService;
         }
         [HttpPost("getSelectListItem")]
-        public async Task<ActionResult<List<SelectListItem>>> GetSelectListItem(string type, string? cascadeValue)
+        public async Task<ActionResult<List<SelectListItemDto>>> GetSelectListItem(string type, string? cascadeValue)
         {
             var selectListItemDtos = await _commonAppService.GetCustomSelectListItem(type, cascadeValue);
-            var selectListItems = selectListItemDtos.Select(item => new SelectListItem
-            {
-                Value = item.Value,
-                Text = item.Text
-            }).ToList();
-            return Ok(selectListItems);
+            return Ok(selectListItemDtos);
         }
 
         [HttpPost("getEnumSelectListItem")]
