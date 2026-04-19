@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Assembly = System.Reflection.Assembly;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,9 +12,16 @@ using RoomRentalManagerServer.Infrastructure.Repositories.UserRepository;
 using StackExchange.Redis;
 using System.Reflection;
 using System.Text;
+using RoomRentalManagerServer.Domain.Model;
+using RoomRentalManagerServer.Domain.Interfaces;
+using RoomRentalManagerServer.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 //cấu hình redis
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+
+// cấu hình cloudinary
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 // khởi tạo kết nối postgredb
 builder.Services.AddDbContext<RoomRentalManagerServerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

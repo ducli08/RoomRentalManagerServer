@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -25,5 +25,6 @@ namespace RoomRentalManagerServer.Application.Model.UsersModel.Dto
         public string PhoneNumber { get; set; }
         public string Password { get; set; }
         public string Avatar { get; set; }
+        public string? AvatarPublicId { get; set; }
     }
 }

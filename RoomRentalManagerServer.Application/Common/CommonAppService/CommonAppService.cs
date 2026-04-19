@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Common.CommonDto;
 using RoomRentalManagerServer.Application.Interfaces;
 using System.ComponentModel.DataAnnotations;
@@ -46,7 +46,8 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
                     districts.ForEach(d => selectListItemDtos.Add(new SelectListItemDto
                     {
                         Value = d.Code,
-                        Text = d.Name
+                        Text = d.Name,
+                        CascaderId = d.ProvinceCode
                     }));
                     break;
                 case "wards":
@@ -54,7 +55,8 @@ namespace RoomRentalManagerServer.Application.Common.CommonAppService
                     wards.ForEach(w => selectListItemDtos.Add(new SelectListItemDto
                     {
                         Value = (w.Code != null ? w.Code : ""),
-                        Text = (w.Name != null ? w.Name : "")
+                        Text = (w.Name != null ? w.Name : ""),
+                        CascaderId = w.DistrictCode
                     }));
                     break;
                 case "user":

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,11 +18,11 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.ImageDescriptions
         [Column("imageFileName")]
         public string ImageFileName { get; set; }
 
-        [Column("image")]
-        public byte[] Image { get; set; }
+        [Column("imageUrl")]
+        public string ImageUrl { get; set; }
 
-        [Column("imageType")]
-        public string ImageType { get; set; }
+        [Column("publicId")]
+        public string PublicId { get; set; }
 
         [Column("createdDate")]
         public DateTime CreatedDate { get; set; }
