@@ -12,6 +12,7 @@ using RoomRentalManagerServer.Application.Model.UsersModel.Dto;
 using RoomRentalManagerServer.Domain.Interfaces.UserInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.User;
 using System.IO;
+using RoomRentalManagerServer.Domain.Interfaces.RoleGroupInterfaces;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -25,8 +26,9 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IConfiguration _configuration;
         private readonly IWebHost _webHostEnvironment;
         private readonly RoomRentalManagerServer.Domain.Interfaces.ICloudinaryService _cloudinaryService;
+        private readonly IRoleGroupRepository _roleGroupRepository;
         
-        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService, IConfiguration configuration, RoomRentalManagerServer.Domain.Interfaces.ICloudinaryService cloudinaryService)
+        public UserAppService(ILogger<UserAppService> logger, IUserRepository userRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService localFileStorageAppService, IConfiguration configuration, RoomRentalManagerServer.Domain.Interfaces.ICloudinaryService cloudinaryService, IRoleGroupRepository roleGroupRepository)
         {
             _logger = logger;
             _mapper = mapper;
@@ -35,6 +37,7 @@ namespace RoomRentalManagerServer.Application.Services
             _localFileStorageAppService = localFileStorageAppService;
             _configuration = configuration;
             _cloudinaryService = cloudinaryService;
+            _roleGroupRepository = roleGroupRepository;
         }
 
         public async Task<(List<string> Paths, List<string> PublicIds, List<string> Errors)> UploadAvatarAsync(List<IFormFile> avatar, string webRoot)
@@ -259,25 +262,43 @@ namespace RoomRentalManagerServer.Application.Services
             }
         }
 
-        private async Task<string?> DownloadAndSaveGoogleAvatarAsync(string? googlePictureUrl, string webRoot)
+        private async Task<(string? Url, string? PublicId)> UploadGoogleAvatarToCloudinaryAsync(string? googlePictureUrl)
         {
             if (string.IsNullOrEmpty(googlePictureUrl))
-                return null;
+                return (null, null);
 
-            webRoot = webRoot ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var (localPath, error) = await _localFileStorageAppService.DownloadImageFromUrlAsync(googlePictureUrl, "uploads/avatar-images", webRoot);
-            
-            if (!string.IsNullOrEmpty(error))
+            try
             {
-                _logger.LogWarning($"Failed to download Google avatar from {googlePictureUrl}: {error}");
-                return null;
+                var result = await _cloudinaryService.UploadImageFromUrlAsync(googlePictureUrl, "avatars");
+                if (!string.IsNullOrEmpty(result.Url))
+                {
+                    return (result.Url, result.PublicId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Failed to upload Google avatar from {googlePictureUrl} to Cloudinary: {ex.Message}");
             }
 
-            return localPath;
+            return (null, null);
         }
 
-        private async Task DeleteOldAvatarIfExistsAsync(string? oldAvatarPath, string webRoot)
+        private async Task DeleteOldAvatarIfExistsAsync(string? oldAvatarPath, string? oldAvatarPublicId, string webRoot)
         {
+            if (!string.IsNullOrEmpty(oldAvatarPublicId))
+            {
+                // Delete from Cloudinary
+                try
+                {
+                    await _cloudinaryService.DeleteImageAsync(oldAvatarPublicId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Failed to delete old avatar from Cloudinary: {ex.Message}");
+                }
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(oldAvatarPath))
                 return;
 
@@ -320,13 +341,15 @@ namespace RoomRentalManagerServer.Application.Services
                         if (needsSync)
                         {
                             var oldAvatarPath = user.Avatar;
-                            var newAvatarPath = await DownloadAndSaveGoogleAvatarAsync(googlePayload.Picture, webRoot);
+                            var oldAvatarPublicId = user.AvatarPublicId;
+                            var (newAvatarUrl, newAvatarPublicId) = await UploadGoogleAvatarToCloudinaryAsync(googlePayload.Picture);
                             
-                            if (!string.IsNullOrEmpty(newAvatarPath))
+                            if (!string.IsNullOrEmpty(newAvatarUrl))
                             {
-                                // Delete old avatar if it's a local file
-                                await DeleteOldAvatarIfExistsAsync(oldAvatarPath, webRoot);
-                                user.Avatar = newAvatarPath;
+                                // Delete old avatar
+                                await DeleteOldAvatarIfExistsAsync(oldAvatarPath, oldAvatarPublicId, webRoot);
+                                user.Avatar = newAvatarUrl;
+                                user.AvatarPublicId = newAvatarPublicId;
                                 user.UpdatedDate = DateTime.UtcNow;
                                 user.LastUpdateUser = "Google";
                                 await _userRepository.UpdateAsync(user);
@@ -350,17 +373,19 @@ namespace RoomRentalManagerServer.Application.Services
                     if (!string.IsNullOrEmpty(googlePayload.Picture))
                     {
                         var oldAvatarPath = userByEmail.Avatar;
-                        var newAvatarPath = await DownloadAndSaveGoogleAvatarAsync(googlePayload.Picture, webRoot);
+                        var oldAvatarPublicId = userByEmail.AvatarPublicId;
+                        var (newAvatarUrl, newAvatarPublicId) = await UploadGoogleAvatarToCloudinaryAsync(googlePayload.Picture);
                         
-                        if (!string.IsNullOrEmpty(newAvatarPath))
+                        if (!string.IsNullOrEmpty(newAvatarUrl))
                         {
-                            // Delete old avatar if it's a local file
-                            await DeleteOldAvatarIfExistsAsync(oldAvatarPath, webRoot);
-                            userByEmail.Avatar = newAvatarPath;
+                            // Delete old avatar
+                            await DeleteOldAvatarIfExistsAsync(oldAvatarPath, oldAvatarPublicId, webRoot);
+                            userByEmail.Avatar = newAvatarUrl;
+                            userByEmail.AvatarPublicId = newAvatarPublicId;
                         }
                         else
                         {
-                            // If download fails, keep old avatar or set to Google URL as fallback
+                            // If upload fails, keep old avatar or set to Google URL as fallback
                             if (string.IsNullOrEmpty(userByEmail.Avatar))
                             {
                                 userByEmail.Avatar = googlePayload.Picture;
@@ -380,22 +405,46 @@ namespace RoomRentalManagerServer.Application.Services
 
                 // User doesn't exist, create new user
                 _logger.LogInformation($"Creating new Google user: {googlePayload.Email}");
-                var defaultRoleGroupId = _configuration["Google:DefaultRoleGroupId"];
                 int roleGroupId = 0;
-                if (!string.IsNullOrEmpty(defaultRoleGroupId) && int.TryParse(defaultRoleGroupId, out int parsedRoleId))
+
+                // Try to assign "Manager" or "Quản lý" role group by default
+                try
                 {
-                    roleGroupId = parsedRoleId;
+                    var allRolesQuery = await _roleGroupRepository.GetAllRoleGroupAsync();
+                    var managerRole = allRolesQuery.FirstOrDefault(x => x.Name.ToLower() == "manager" || x.Name.ToLower() == "quản lý");
+                    if (managerRole != null)
+                    {
+                        roleGroupId = (int)managerRole.Id;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Failed to query Manager role group: {ex.Message}");
+                }
+
+                // Fallback to appsettings.json if no Manager role found
+                if (roleGroupId == 0)
+                {
+                    var defaultRoleGroupId = _configuration["Google:DefaultRoleGroupId"];
+                    if (!string.IsNullOrEmpty(defaultRoleGroupId) && int.TryParse(defaultRoleGroupId, out int parsedRoleId))
+                    {
+                        roleGroupId = parsedRoleId;
+                    }
                 }
 
                 string? avatarPath = null;
+                string? avatarPublicId = null;
                 if (!string.IsNullOrEmpty(googlePayload.Picture))
                 {
-                    avatarPath = await DownloadAndSaveGoogleAvatarAsync(googlePayload.Picture, webRoot);
+                    var result = await UploadGoogleAvatarToCloudinaryAsync(googlePayload.Picture);
+                    avatarPath = result.Url;
+                    avatarPublicId = result.PublicId;
+
                     if (string.IsNullOrEmpty(avatarPath))
                     {
-                        // If download fails, use Google URL as fallback
+                        // If upload fails, use Google URL as fallback
                         avatarPath = googlePayload.Picture;
-                        _logger.LogWarning($"Failed to download avatar for new user {googlePayload.Email}, using Google URL as fallback");
+                        _logger.LogWarning($"Failed to upload avatar to Cloudinary for new user {googlePayload.Email}, using Google URL as fallback");
                     }
                 }
 
@@ -406,6 +455,7 @@ namespace RoomRentalManagerServer.Application.Services
                     Provider = "Google",
                     ProviderId = googlePayload.Sub,
                     Avatar = avatarPath ?? string.Empty,
+                    AvatarPublicId = avatarPublicId,
                     RoleGroupId = roleGroupId,
                     Password = Guid.NewGuid().ToString(), // Placeholder password for Google users (never used)
                     CreatedDate = DateTime.UtcNow,
