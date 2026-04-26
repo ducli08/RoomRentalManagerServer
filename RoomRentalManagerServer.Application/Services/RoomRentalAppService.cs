@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RoomRentalManagerServer.Application.Common.CommonDto;
@@ -8,6 +8,7 @@ using RoomRentalManagerServer.Domain.Interfaces.RoomRentalInterfaces;
 using RoomRentalManagerServer.Domain.ModelEntities.RoomRentals;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using RoomRentalManagerServer.Domain.Interfaces;
 
 namespace RoomRentalManagerServer.Application.Services
 {
@@ -17,14 +18,14 @@ namespace RoomRentalManagerServer.Application.Services
         private readonly IMapper _mapper;
         private readonly IRoomRentalRepository _roomRentalRepository;
         private readonly ICurrentUserAppService _currentUserAppService;
-        private readonly ILocalFileStorageAppService _fileStorageService;
-        public RoomRentalAppService(ILogger<RoomRentalAppService> logger, IRoomRentalRepository roomRentalRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ILocalFileStorageAppService fileStorageService)
+        private readonly ICloudinaryService _cloudinaryService;
+        public RoomRentalAppService(ILogger<RoomRentalAppService> logger, IRoomRentalRepository roomRentalRepository, IMapper mapper, ICurrentUserAppService currentUserAppService, ICloudinaryService cloudinaryService)
         {
             _logger = logger;
             _mapper = mapper;
             _roomRentalRepository = roomRentalRepository;
             _currentUserAppService = currentUserAppService;
-            _fileStorageService = fileStorageService;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<(List<string> Paths, List<string> Errors)> UploadImageDescriptionAsync(List<IFormFile> uploadImages, string webRoot)
@@ -35,8 +36,30 @@ namespace RoomRentalManagerServer.Application.Services
                 return (new List<string>(), new List<string> { "User is not authenticated." });
             }
 
-            // delegate to file storage service; relative folder without leading slash
-            var (paths, errors) = await _fileStorageService.UploadFilesAsync(uploadImages, "uploads/room-images", webRoot);
+            var paths = new List<string>();
+            var errors = new List<string>();
+
+            foreach (var file in uploadImages)
+            {
+                try
+                {
+                    var (url, publicId) = await _cloudinaryService.UploadImageAsync(file, "room-rentals");
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        paths.Add(url);
+                    }
+                    else
+                    {
+                        errors.Add($"Failed to upload {file.FileName} to Cloudinary.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to upload image {FileName} to Cloudinary", file.FileName);
+                    errors.Add($"Failed to upload {file.FileName}: {ex.Message}");
+                }
+            }
+
             return (paths, errors);
         }
 
@@ -105,19 +128,33 @@ namespace RoomRentalManagerServer.Application.Services
                 {
                     if (roomRental.ImagesDescription != null && roomRental.ImagesDescription.Any())
                     {
-                        foreach (var imgPath in roomRental.ImagesDescription)
+                        foreach (var imgUrl in roomRental.ImagesDescription)
                         {
-                            if (string.IsNullOrWhiteSpace(imgPath))
+                            if (string.IsNullOrWhiteSpace(imgUrl))
                                 continue;
 
                             try
                             {
-                                await _fileStorageService.DeleteFileAsync(imgPath, webRoot);
-                                _logger.LogInformation("Deleted image file {FilePath} for room rental {Id}", imgPath, id);
+                                // Attempt to extract publicId from Cloudinary URL if possible, or just skip deletion
+                                // A typical Cloudinary URL: https://res.cloudinary.com/.../upload/v.../folder/filename.ext
+                                // For now we just log it since deleting from Cloudinary needs the exact publicId.
+                                // If needed, we can parse it:
+                                var uri = new Uri(imgUrl);
+                                var segments = uri.Segments;
+                                var uploadIndex = Array.FindIndex(segments, s => s == "upload/");
+                                if (uploadIndex >= 0 && segments.Length > uploadIndex + 2)
+                                {
+                                    // Skip the version segment (e.g. v123456/)
+                                    var publicIdWithExtension = string.Join("", segments.Skip(uploadIndex + 2));
+                                    var publicId = Path.ChangeExtension(publicIdWithExtension, null).Replace("\\", "/");
+                                    
+                                    await _cloudinaryService.DeleteImageAsync(publicId);
+                                    _logger.LogInformation("Deleted image file {PublicId} from Cloudinary for room rental {Id}", publicId, id);
+                                }
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogWarning(ex, "Failed to delete image file {FilePath} for room rental {Id}", imgPath, id);
+                                _logger.LogWarning(ex, "Failed to delete image {Url} from Cloudinary for room rental {Id}", imgUrl, id);
                             }
                         }
                     }
