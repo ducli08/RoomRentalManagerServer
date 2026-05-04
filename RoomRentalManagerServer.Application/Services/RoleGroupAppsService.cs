@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -120,20 +120,29 @@ namespace RoomRentalManagerServer.Application.Services
                 if (isUpdate)
                 {
                     await UpdateRoleGroupAsync(roleGroup);
+                    // Remove existing permissions
+                    await _roleGroupPermissionRepository.DeleteActivePermissionByRoleGroupIdAsync(roleGroup.Id);
                 }
                 else
                 {
                     await AddRoleGroupAsync(roleGroup);
-                    foreach(var item in createOrEditRoleGroupDto.RoleDtos)
+                }
+
+                if (createOrEditRoleGroupDto.RoleDtos != null)
+                {
+                    foreach (var item in createOrEditRoleGroupDto.RoleDtos)
                     {
-                        foreach(var permission in item.Permissions)
+                        if (item.Permissions != null)
                         {
-                            var roleGroupRole = new RoleGroupPermission
+                            foreach (var permission in item.Permissions)
                             {
-                                RoleGroupId = roleGroup.Id,
-                                PermissionId = permission.Id
-                            };
-                            await AddRoleGroupPermission(roleGroupRole);
+                                var roleGroupRole = new RoleGroupPermission
+                                {
+                                    RoleGroupId = roleGroup.Id,
+                                    PermissionId = permission.Id
+                                };
+                                await AddRoleGroupPermission(roleGroupRole);
+                            }
                         }
                     }
                 }

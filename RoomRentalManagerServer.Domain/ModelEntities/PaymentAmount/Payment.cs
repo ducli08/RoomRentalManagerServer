@@ -19,27 +19,28 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.PaymentAmount
 
         [Column("paymentDate")]
         [Display(Name = "Ngày thanh toán")]
-        public decimal PaymentDate { get; set; }
+        public DateTime PaymentDate { get; set; }
 
         [Column("paymentMethod")]
         [Display(Name = "Phương thức thanh toán")]
         public PaymentMethod PaymentMethod { get; set; }
 
-        [Column("statusPayment")]
-        [Display(Name = "Trạng thái thanh toán")]
-        public PaymentStatus StatusPayment { get; set; }
-
         [Column("note")]
         [Display(Name = "Ghi chú")]
-        public string Note { get; set; }
+        public string? Note { get; set; }
 
         [Column("createdAt")]
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("updatedAt")]
+        public DateTime UpdatedAt { get; set; }
+
+        [Column("creatorUser")]
+        public string CreatorUser { get; set; }
+
         [Column("lastUpdateUser")]
-        [Display(Name = "Người cập nhật")]
-        public DateTime LastUpdateUser { get; set; }
+        public string LastUpdateUser { get; set; }
     }
 
     public enum PaymentMethod
@@ -50,13 +51,5 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.PaymentAmount
         BankTransfer = 2,
         [Display(Name = "Thẻ")]
         Card = 3
-    }
-    public enum PaymentStatus {
-        [Display(Name = "Chưa thanh toán")]
-        Unpaid = 1,
-        [Display(Name = "Đã thanh toán")]
-        Paid = 2,
-        [Display(Name = "Quá hạn")]
-        Overdue = 3
     }
 }
