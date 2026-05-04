@@ -27,8 +27,17 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.Invoices
         [Column("totalAmount")]
         public decimal TotalAmount { get; set; }
 
+        [Column("amountPaid")]
+        public decimal AmountPaid { get; set; }
+
         [Column("invoiceStatus")]
         public InvoiceStatus Status { get; set; }
+
+        [Column("issuedAt")]
+        public DateTime? IssuedAt { get; set; }
+
+        [Column("cancelledAt")]
+        public DateTime? CancelledAt { get; set; }
 
         [Column("createdAt")]
         public DateTime CreatedAt { get; set; }
@@ -45,11 +54,15 @@ namespace RoomRentalManagerServer.Domain.ModelEntities.Invoices
     }
     public enum InvoiceStatus
     {
-        [Display(Name = "Chưa thanh toán")]
-        Unpaid = 1,
+        [Display(Name = "Nháp")]
+        Draft = 1,
+        [Display(Name = "Đã phát hành")]
+        Issued = 2,
+        [Display(Name = "Đã thanh toán một phần")]
+        PartiallyPaid = 3,
         [Display(Name = "Đã thanh toán")]
-        Paid = 2,
-        [Display(Name = "Quá hạn")]
-        Overdue = 3
+        Paid = 4,
+        [Display(Name = "Đã hủy")]
+        Cancelled = 5
     }
 }

@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RoomRentalManagerServer.Domain.ModelEntities;
+using RoomRentalManagerServer.Domain.ModelEntities.BankAccounts;
 using RoomRentalManagerServer.Domain.ModelEntities.Contracts;
 using RoomRentalManagerServer.Domain.ModelEntities.Districts;
 using RoomRentalManagerServer.Domain.ModelEntities.Equipments;
 using RoomRentalManagerServer.Domain.ModelEntities.ImageDescriptions;
 using RoomRentalManagerServer.Domain.ModelEntities.Invoices;
 using RoomRentalManagerServer.Domain.ModelEntities.PaymentAmount;
+using RoomRentalManagerServer.Domain.ModelEntities.PaymentSubmissions;
 using RoomRentalManagerServer.Domain.ModelEntities.Provinces;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroupPermission;
 using RoomRentalManagerServer.Domain.ModelEntities.RoleGroups;
@@ -26,6 +28,8 @@ public class RoomRentalManagerServerDbContext : DbContext
     public DbSet<Contract> Contracts { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<PaymentSubmission> PaymentSubmissions { get; set; }
+    public DbSet<BankAccount> BankAccounts { get; set; }
     public DbSet<RoomEquipment> RoomEquipments { get; set; }
     public DbSet<Equipment> Equipments { get; set; }
     public DbSet<Province> Province { get; set; }
